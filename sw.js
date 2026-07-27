@@ -1,7 +1,9 @@
-/* Stride service worker — caches the app shell so it opens offline.
-   IMPORTANT: never cache /api/ calls — those must always hit the network
-   so live Strava/weather data is fresh. */
-const CACHE = "stride-v2";
+/* Stride service worker.
+   - /api/ calls: never cached (always network) so live data is fresh.
+   - App shell (HTML/navigation): network-first so new versions load immediately,
+     falling back to cache only when offline.
+   - Other static assets (icons, Chart.js): cache-first for speed/offline. */
+const CACHE = "stride-v3";
 const ASSETS = [
   "index.html",
   "manifest.webmanifest",
@@ -23,18 +25,34 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+function cachePut(req, res) {
+  const copy = res.clone();
+  caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+  return res;
+}
+
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   const url = new URL(e.request.url);
-  // Always go to the network for API + auth routes; never serve them from cache.
+
+  // Live data: always network, never cache.
   if (url.pathname.startsWith("/api/")) return;
+
+  // App shell: network-first so updates appear right away.
+  const isShell = e.request.mode === "navigate" ||
+    url.pathname === "/" || url.pathname.endsWith("/index.html");
+  if (isShell) {
+    e.respondWith(
+      fetch(e.request).then((res) => cachePut(e.request, res))
+        .catch(() => caches.match(e.request).then((h) => h || caches.match("index.html")))
+    );
+    return;
+  }
+
+  // Other static assets: cache-first.
   e.respondWith(
     caches.match(e.request).then((hit) =>
-      hit || fetch(e.request).then((res) => {
-        const copy = res.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, copy)).catch(() => {});
-        return res;
-      }).catch(() => caches.match("index.html"))
+      hit || fetch(e.request).then((res) => cachePut(e.request, res)).catch(() => caches.match("index.html"))
     )
   );
 });
