@@ -20,44 +20,43 @@ body { margin:0; background:#f4f5f8; color:#161a1f;
   padding:calc(env(safe-area-inset-top) + 16px) 18px 18px; display:flex; align-items:center; gap:12px; }
 .topbar h1 { margin:0; font-size:22px; }
 .topbar .sub { opacity:.85; font-size:13px; margin-top:2px; }
-.back { background:rgba(255,255,255,.2); border:none; color:#fff; font-size:16px; font-weight:600;
-  border-radius:10px; padding:6px 12px; cursor:pointer; }
+.back { background:rgba(255,255,255,.2); border:none; color:#fff; font-size:16px; font-weight:600; border-radius:10px; padding:6px 12px; cursor:pointer; }
 .wrap { padding:16px 14px 90px; max-width:640px; margin:0 auto; }
 .cards { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
 .card { background:#fff; border:1px solid #e7e9ee; border-radius:16px; padding:13px 15px; }
 .card .k { font-size:11px; color:#7a828c; text-transform:uppercase; letter-spacing:.05em; }
-.card .v { font-size:24px; font-weight:680; margin-top:3px; }
+.card .v { font-size:23px; font-weight:680; margin-top:3px; }
 .card .v small { font-size:13px; font-weight:500; color:#7a828c; }
 .panel { background:#fff; border:1px solid #e7e9ee; border-radius:16px; padding:15px 16px; margin-bottom:14px; }
-.panel.tap { cursor:pointer; transition:transform .08s; }
-.panel.tap:active { transform:scale(.99); }
-.panel h2 { font-size:14px; margin:0 0 4px; display:flex; justify-content:space-between; align-items:center; }
+.panel.tap { cursor:pointer; transition:transform .08s; } .panel.tap:active { transform:scale(.99); }
+.panel h2 { font-size:14px; margin:0 0 4px; display:flex; justify-content:space-between; align-items:center; gap:6px; }
 .panel h2 .chev { color:#c2c7cf; font-weight:700; }
 .panel .hint { font-size:11px; color:#9aa0a8; }
-.chart-box { position:relative; height:200px; margin-top:8px; }
-.chart-box.tall { height:260px; }
+.chart-box { position:relative; height:200px; margin-top:8px; } .chart-box.tall { height:260px; }
 .ai { background:linear-gradient(135deg,#eef0ff,#f6f2ff); border-color:#e2e3f6; }
-.ai h2 { gap:7px; justify-content:flex-start; }
+.ai h2 { justify-content:flex-start; gap:7px; }
 .ai .badge { font-size:9px; background:var(--indigo); color:#fff; padding:2px 7px; border-radius:20px; }
 .ai p { margin:0; font-size:14.5px; line-height:1.5; }
+.ask { display:flex; gap:8px; margin-top:12px; }
+.ask input { flex:1; border:1px solid #d9dbe6; border-radius:11px; padding:10px 12px; font-size:14px; background:#fff; }
+#coachAns { margin-top:10px; font-size:14px; color:#2a2d33; line-height:1.5; }
 .banner { border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.45; }
 .banner.warn { background:#fff8e6; border:1px solid #f3dd93; color:#7a5b00; }
 .banner.connect { background:#fff; border:1px solid #e2e3f6; display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .banner.connect .t { font-size:13px; color:#4a4f57; }
-.btn { color:#fff; text-decoration:none; font-weight:650; font-size:14px; padding:10px 16px; border-radius:12px; white-space:nowrap; display:inline-block; }
+.btn { color:#fff; text-decoration:none; font-weight:650; font-size:14px; padding:10px 16px; border-radius:12px; white-space:nowrap; display:inline-block; border:none; cursor:pointer; }
 .tag { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; letter-spacing:.05em; }
 .tag.live { background:#e7f6ec; color:#177245; } .tag.demo { background:#eef0f3; color:#7a828c; }
 table { width:100%; border-collapse:collapse; font-size:13px; }
 th,td { text-align:right; padding:7px 6px; border-bottom:1px solid #eef0f3; white-space:nowrap; }
 th:first-child,td:first-child { text-align:left; }
 th { color:#7a828c; font-weight:600; font-size:10px; text-transform:uppercase; }
-.pill { display:inline-block; padding:1px 7px; border-radius:20px; font-size:11px; font-weight:600; }
-.pill.ok { background:#e7f6ec; color:#177245; } .pill.no { background:#fdecec; color:#c0392b; }
+.pill { display:inline-block; padding:1px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+.pill.ok { background:#e7f6ec; color:#177245; } .pill.no { background:#fdecec; color:#c0392b; } .pill.mid { background:#fff3d6; color:#8a6100; }
 .muted { color:#9aa0a8; font-size:11.5px; margin-top:8px; }
 .foot { text-align:center; color:#aab0b8; font-size:11px; margin-top:18px; }
 .chips { display:flex; gap:8px; margin:2px 0 14px; flex-wrap:wrap; }
-.chip { background:#fff; border:1px solid #e0e3e8; color:#4a4f57; font-size:12.5px; font-weight:600;
-  padding:7px 13px; border-radius:20px; cursor:pointer; }
+.chip { background:#fff; border:1px solid #e0e3e8; color:#4a4f57; font-size:12.5px; font-weight:600; padding:7px 13px; border-radius:20px; cursor:pointer; }
 .chip.on { background:var(--indigo); border-color:var(--indigo); color:#fff; }
 .section-title { font-size:13px; font-weight:700; color:#4a4f57; margin:2px 2px 8px; }
 .loading { text-align:center; color:#8a9099; padding:40px 0; }
@@ -68,17 +67,21 @@ th { color:#7a828c; font-weight:600; font-size:10px; text-transform:uppercase; }
 <div class="wrap" id="content"><div class="loading">Loading…</div></div>
 
 <script>
-/* ---------------- data ---------------- */
-const DEMO = [
- {d:"2026-05-02",m:8011,t:3164,mps:2.532,c:79,e:116,el:64,g:true},
- {d:"2026-05-13",m:7752,t:2652,mps:2.923,c:82,e:167,el:67,g:true},
- {d:"2026-05-31",m:21330,t:7647,mps:2.789,c:81,e:574,el:256,g:true},
- {d:"2026-06-13",m:5019,t:1698,mps:2.956,c:85,e:119,el:23,g:true},
- {d:"2026-06-24",m:5017,t:1677,mps:2.992,c:84,e:104,el:37,g:true},
- {d:"2026-07-22",m:5015,t:1788,mps:2.805,c:81,e:29,el:0,g:false},
- {d:"2026-07-26",m:5020,t:1958,mps:2.564,c:77,e:49,el:0,g:false}
+/* ---------------- demo data (fallback only) ---------------- */
+const DEMO_RUNS = [
+ {d:"2026-05-13",m:7752,t:2652,mps:2.923,c:82,e:167,el:67,hr:158,g:true},
+ {d:"2026-05-31",m:21330,t:7647,mps:2.789,c:81,e:574,el:256,hr:161,g:true},
+ {d:"2026-06-13",m:5019,t:1698,mps:2.956,c:85,e:119,el:23,hr:156,g:true},
+ {d:"2026-06-24",m:5017,t:1677,mps:2.992,c:84,e:104,el:37,hr:154,g:true},
+ {d:"2026-07-22",m:5015,t:1788,mps:2.805,c:81,e:29,el:0,hr:150,g:false},
+ {d:"2026-07-26",m:5020,t:1958,mps:2.564,c:77,e:49,el:0,hr:148,g:false}
 ];
-const state = { runs:[], oura:null, withings:null, live:false, view:"home", range:"12W", rf:"all" };
+const DEMO_WK = [
+ {d:"2026-07-21",t:2890,e:104,hr:149,name:"F45",type:"Workout"},
+ {d:"2026-07-23",t:2699,e:124,hr:151,name:"F45",type:"Workout"},
+ {d:"2026-07-25",t:2885,e:110,hr:150,name:"F45",type:"Workout"}
+];
+const state = { runs:[], workouts:[], oura:null, withings:null, live:false, view:"home", range:"12W", rf:"all" };
 let charts = [];
 function clearCharts(){ charts.forEach(c=>{ try{c.destroy();}catch(e){} }); charts=[]; }
 
@@ -88,53 +91,89 @@ const fmtDur=s=>{const h=Math.floor(s/3600),m=Math.round((s-h*3600)/60);return h
 function wkKey(d){const t=new Date(d);const day=(t.getDay()+6)%7;t.setDate(t.getDate()-day);
   return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");}
 const wkLbl=k=>{const p=k.split("-");return p[1]+"/"+p[2];};
-const md=d=>d.slice(5);
-function anchor(){ let ds=state.runs.map(r=>r.d);
+const md=d=>d.slice(5); const md0=d=>(""+d).slice(0,10);
+function anchor(){ let ds=state.runs.map(r=>r.d).concat((state.workouts||[]).map(w=>w.d));
   if(state.oura&&state.oura.days) ds=ds.concat(state.oura.days.map(x=>x.day));
-  if(state.withings&&state.withings.series) ds=ds.concat(state.withings.series.map(x=>x.date));
   const t=ds.map(x=>+new Date(x)).filter(n=>!isNaN(n)); return t.length?new Date(Math.max.apply(null,t)):new Date(); }
 function rangeStartMs(){ const days=state.range==="4W"?28:state.range==="12W"?84:100000; return anchor().getTime()-days*864e5; }
 const inRange=d=>+new Date(d)>=rangeStartMs();
 function runsSorted(){ return state.runs.slice().sort((a,b)=>new Date(a.d)-new Date(b.d)); }
 function runsInRange(){ return runsSorted().filter(r=>inRange(r.d)); }
+const effOf=r=>(r.hr&&r.mps)?+(r.mps/r.hr*1000).toFixed(1):null;
 
 const card=(k,v)=>`<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`;
 const gx={grid:{color:"#eef0f3"},ticks:{color:"#8a9099",font:{size:10}}};
 const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
 
-/* ---------------- coach note ---------------- */
-function coachNote(runs){
-  if(!runs.length) return "";
-  const n=runs.length, km=runs.reduce((s,r)=>s+r.m,0)/1000, cad=Math.round(runs.reduce((s,r)=>s+r.c,0)/n);
-  const gps=runs.filter(r=>r.g), noGps=runs.filter(r=>!r.g).length;
-  const fastest=gps.length?gps.reduce((a,b)=>b.mps>a.mps?b:a):runs[0];
-  let s=`Over these ${n} runs you covered ${km.toFixed(0)} km with steady, repeatable volume. `;
-  s+=`Cadence averages about ${cad} spm`+(fastest?`, and your sharpest well-tracked 5k pace was around ${fmtPace(fastest.mps)}/km. `:`. `);
-  if(noGps) s+=`Note: ${noGps} recent run(s) recorded without GPS, so their pace is an estimate. `;
-  const hot=runs.filter(r=>r.wx&&r.wx.tmax!=null).reduce((a,b)=>(a&&a.wx.tmax>=b.wx.tmax?a:b),null);
-  if(hot&&hot.wx.tmax>=25) s+=`Your ${md(hot.d)} run hit about ${Math.round(hot.wx.tmax)}°C — heat adds ~10–20 sec/km, so don't read a hot-day slowdown as lost fitness. `;
-  if(state.oura&&state.oura.connected&&state.oura.days&&state.oura.days.length){
-    const r=state.oura.days[state.oura.days.length-1].readiness;
-    if(r!=null) s+=`Latest Oura readiness is ${r}${r<70?" — a good day to keep it easy":" — you're recovered enough for quality"}. `;
-  }
-  s+=`Tap any card below for the full trend.`;
-  return s;
+function weeklyFrom(runs, works){ const wk={};
+  runs.forEach(r=>{const k=wkKey(r.d); wk[k]=wk[k]||{km:0,runE:0,f45E:0,n:0,f45n:0}; wk[k].km+=r.m/1000; wk[k].runE+=r.e; wk[k].n++;});
+  (works||[]).forEach(w=>{const k=wkKey(w.d); wk[k]=wk[k]||{km:0,runE:0,f45E:0,n:0,f45n:0}; wk[k].f45E+=w.e; wk[k].f45n++;});
+  return wk; }
+const weekly=()=>weeklyFrom(runsSorted(), state.workouts);
+function computeAcwr(){ const wk=weekly(); const weeks=Object.keys(wk).sort(); if(weeks.length<2) return null;
+  const tot=k=>wk[k].runE+wk[k].f45E; const acute=tot(weeks[weeks.length-1]);
+  const prev=weeks.slice(Math.max(0,weeks.length-5),weeks.length-1);
+  const chronic=prev.length?prev.reduce((s,k)=>s+tot(k),0)/prev.length:0;
+  return chronic>0?+(acute/chronic).toFixed(2):null; }
+function effTrend(){ const a=anchor().getTime(); const R=runsSorted();
+  const rec=R.filter(r=>effOf(r)!=null && +new Date(r.d)>=a-28*864e5);
+  const pri=R.filter(r=>effOf(r)!=null && +new Date(r.d)<a-28*864e5 && +new Date(r.d)>=a-56*864e5);
+  const avg=arr=>arr.length?+(arr.reduce((s,r)=>s+effOf(r),0)/arr.length).toFixed(1):null;
+  return {recent:avg(rec), prior:avg(pri)}; }
+function avgHrOf(list){ const h=list.filter(w=>w.hr); return h.length?Math.round(h.reduce((s,w)=>s+w.hr,0)/h.length)+' <small>bpm</small>':"–"; }
+
+/* ---------------- stats for the coach ---------------- */
+function buildStats(){
+  const runs=runsSorted(), wk=weekly(), weeks=Object.keys(wk).sort();
+  const totalKm=runs.reduce((s,r)=>s+r.m,0)/1000, totalT=runs.reduce((s,r)=>s+r.t,0);
+  const weekly5=weeks.slice(-5).map(k=>({week:wkLbl(k),km:+wk[k].km.toFixed(1),runLoad:wk[k].runE,f45Load:wk[k].f45E,total:wk[k].runE+wk[k].f45E,runs:wk[k].n,f45:wk[k].f45n}));
+  const a=anchor().getTime();
+  const f45recent=(state.workouts||[]).filter(w=>+new Date(w.d)>=a-28*864e5);
+  const f45hr=f45recent.filter(w=>w.hr);
+  const rec=state.oura&&state.oura.days&&state.oura.days.length?state.oura.days[state.oura.days.length-1]:null;
+  const body=state.withings&&state.withings.series&&state.withings.series.length?state.withings.series[state.withings.series.length-1]:null;
+  return {
+    period: runs.length?runs[0].d+" to "+runs[runs.length-1].d:"",
+    totalRuns: runs.length, totalKm:+totalKm.toFixed(0), avgPacePerKm: fmtPace(totalT?totalKm*1000/totalT:0),
+    weeklyLoad: weekly5, acwr: computeAcwr(),
+    recentRuns: runs.slice(-6).map(r=>({date:r.d, km:+(r.m/1000).toFixed(1), pace:fmtPace(r.mps), avgHr:r.hr, cadence:r.c, tempC:r.wx&&r.wx.t!=null?Math.round(r.wx.t):null, gps:r.g})),
+    f45: { totalSessions:(state.workouts||[]).length, last28days:f45recent.length, avgHr:f45hr.length?Math.round(f45hr.reduce((s,w)=>s+w.hr,0)/f45hr.length):null },
+    aerobicEfficiency: effTrend(),
+    recovery: rec, body: body
+  };
+}
+
+/* ---------------- coach (rules fallback) ---------------- */
+function coachNote(){
+  const runs=runsSorted(); if(!runs.length) return "";
+  const km=runs.reduce((s,r)=>s+r.m,0)/1000, n=runs.length, acwr=computeAcwr();
+  const f45=(state.workouts||[]).length, eff=effTrend();
+  let s=`You've logged ${n} runs (${km.toFixed(0)} km)`+(f45?` and ${f45} F45 sessions`:``)+`. `;
+  if(acwr!=null) s+= acwr>1.5?`Your combined load jumped this week (acute:chronic ${acwr}) — ease off to stay healthy. `: acwr<0.8?`Load has dipped (ratio ${acwr}) — room to build if you feel fresh. `:`Load is well balanced (ratio ${acwr}). `;
+  if(eff.recent!=null&&eff.prior!=null) s+= eff.recent>eff.prior?`Aerobic efficiency is up (${eff.prior}→${eff.recent}) — you're getting fitter. `:`Aerobic efficiency is ${eff.recent} (was ${eff.prior}). `;
+  if(state.oura&&state.oura.days&&state.oura.days.length){ const r=state.oura.days[state.oura.days.length-1].readiness; if(r!=null) s+=`Latest readiness ${r}${r<70?" — keep today easy":" — good for quality"}. `; }
+  s+=`Ask me anything below.`; return s;
 }
 
 /* ---------------- HOME ---------------- */
 function renderHome(){
   clearCharts();
   const runs=runsSorted();
-  document.getElementById("topbar").innerHTML =
-    `<div><h1>Stride</h1><div class="sub">${runs.length?md0(runs[0].d)+" → "+md0(runs[runs.length-1].d):""} <span class="tag ${state.live?'live':'demo'}">${state.live?'LIVE':'DEMO'}</span></div></div>`;
+  document.getElementById("topbar").innerHTML=`<div><h1>Stride</h1><div class="sub">${runs.length?md0(runs[0].d)+" → "+md0(runs[runs.length-1].d):""} <span class="tag ${state.live?'live':'demo'}">${state.live?'LIVE':'DEMO'}</span></div></div>`;
   if(!runs.length){ document.getElementById("content").innerHTML='<div class="loading">No runs found.</div>'; return; }
+  const totalM=runs.reduce((s,r)=>s+r.m,0), totalT=runs.reduce((s,r)=>s+r.t,0), avgMps=totalM/totalT;
+  const noGps=runs.filter(r=>!r.g), acwr=computeAcwr(), eff=effTrend(), f45=state.workouts||[];
+  const a=anchor().getTime(); const f45_28=f45.filter(w=>+new Date(w.d)>=a-28*864e5);
 
-  const totalM=runs.reduce((s,r)=>s+r.m,0), totalT=runs.reduce((s,r)=>s+r.t,0);
-  const avgMps=totalM/totalT, noGps=runs.filter(r=>!r.g);
   let h="";
   if(!state.live) h+=`<div class="banner connect"><span class="t">Demo data. Connect Strava for your live training.</span><a class="btn" style="background:#fc4c02" href="/api/strava/login">Connect with Strava</a></div>`;
   h+=`<div data-open="runs" style="cursor:pointer"><div class="cards">${card("Runs",runs.length)}${card("Distance",(totalM/1000).toFixed(0)+' <small>km</small>')}${card("Time",fmtDur(totalT))}${card("Avg pace",fmtPace(avgMps)+' <small>/km</small>')}</div></div>`;
   if(noGps.length) h+=`<div class="banner warn">⚠️ <b>${noGps.length} recent run(s) recorded without GPS</b> — distance was watch-estimated, so their pace is approximate.</div>`;
+
+  // Coach v2
+  h+=`<div class="panel ai"><h2>🧠 Coach's read <span class="badge">v2</span></h2><p id="coachText">Analysing your training…</p>
+    <div class="ask"><input id="coachQ" placeholder="Ask your coach anything…"><button class="btn" data-ask style="background:var(--indigo)">Ask</button></div>
+    <div id="coachAns"></div></div>`;
 
   if(state.oura&&state.oura.connected&&state.oura.days&&state.oura.days.length){
     const l=state.oura.days[state.oura.days.length-1];
@@ -149,77 +188,94 @@ function renderHome(){
     h+=`<div class="banner connect"><span class="t">Add body-composition trends from your Withings scale.</span><a class="btn" style="background:#00a6de" href="/api/withings/login">Connect Withings</a></div>`;
   }
 
-  h+=`<div class="panel ai"><h2>🧠 Coach's read <span class="badge">v1</span></h2><p>${coachNote(runs)}</p></div>`;
+  // Training load (combined) + ACWR
+  let acwrPill=""; if(acwr!=null){ const cls=acwr>1.5?"no":acwr<0.8?"mid":"ok"; acwrPill=`<span class="pill ${cls}">ACWR ${acwr}</span>`; }
+  h+=`<div class="panel tap" data-open="load"><h2><span>Training load</span> <span>${acwrPill} <span class="chev">›</span></span></h2><div class="hint">runs + F45 · weekly relative effort</div><div class="chart-box"><canvas id="ld"></canvas></div></div>`;
+
+  // Aerobic efficiency
+  if(eff.recent!=null){
+    const dir = eff.prior!=null ? (eff.recent>eff.prior?'<span class="pill ok">↑ fitter</span>':eff.recent<eff.prior?'<span class="pill mid">↓ down</span>':'→') : "–";
+    h+=`<div class="panel tap" data-open="efficiency"><h2>Aerobic efficiency <span class="chev">›</span></h2><div class="hint">speed per heartbeat · higher = fitter</div>
+      <div class="cards" style="margin-top:8px">${card("Now",eff.recent)}${card("Prev 4 wks",eff.prior??"–")}${card("Trend",dir)}${card("From runs w/ HR",runs.filter(r=>effOf(r)!=null).length)}</div></div>`;
+  }
+
+  // Cross-training / F45
+  if(f45.length){
+    const thisWk=f45.filter(w=>wkKey(w.d)===wkKey(md0(anchor()))).length;
+    h+=`<div class="panel tap" data-open="f45"><h2>Cross-training · F45 <span class="chev">›</span></h2><div class="hint">strength &amp; cardio classes · counts toward load</div>
+      <div class="cards" style="margin-top:8px">${card("Sessions",f45.length)}${card("Last 4 wks",f45_28.length)}${card("Avg HR",avgHrOf(f45_28))}${card("This week",thisWk)}</div></div>`;
+  }
+
   h+=tapChart("Weekly volume","kilometres per week","volume","wk");
   h+=tapChart("Pace trend","per run · higher = faster · red = no GPS","pace","pc");
   h+=tapChart("Cadence trend","steps per minute","cadence","cd");
-  h+=tapChart("Training load","weekly relative effort","load","ld");
 
   const recent=runs.slice(-8).reverse();
   h+=`<div class="panel tap" data-open="runs"><h2>Recent runs <span class="chev">›</span></h2><div class="hint">all distances · tap for full list &amp; filters</div>
-    <table style="margin-top:10px"><thead><tr><th>Date</th><th>Dist</th><th>Pace</th><th>Cad</th><th>Temp</th></tr></thead><tbody>`+
-    recent.map(r=>`<tr><td>${md(r.d)}</td><td>${(r.m/1000).toFixed(1)}</td><td>${fmtPace(r.mps)}</td><td>${r.c||"–"}</td><td>${r.wx&&r.wx.t!=null?Math.round(r.wx.t)+"°":"–"}</td></tr>`).join("")+
+    <table style="margin-top:10px"><thead><tr><th>Date</th><th>Dist</th><th>Pace</th><th>HR</th><th>Temp</th></tr></thead><tbody>`+
+    recent.map(r=>`<tr><td>${md(r.d)}</td><td>${(r.m/1000).toFixed(1)}</td><td>${fmtPace(r.mps)}</td><td>${r.hr||"–"}</td><td>${r.wx&&r.wx.t!=null?Math.round(r.wx.t)+"°":"–"}</td></tr>`).join("")+
     `</tbody></table></div>`;
-
-  h+=`<div class="foot"><b>Stride</b> · ${state.live?'live from Strava · Oura · Withings · weather':'demo mode'}.<br>Tap any card for the full trend and history.</div>`;
+  h+=`<div class="foot"><b>Stride</b> · ${state.live?'live · Strava · Oura · Withings · weather · AI coach':'demo mode'}.<br>Tap any card for full trends &amp; history.</div>`;
   document.getElementById("content").innerHTML=h;
 
-  drawVolume("wk"); drawPace("pc"); drawCadence("cd"); drawLoad("ld");
+  drawLoadChart("ld", weekly());
+  drawVolume("wk"); drawPace("pc"); drawCadence("cd");
+  loadCoach();
 }
-const md0=d=>d.slice(0,10);
 function tapChart(title,hint,open,id){ return `<div class="panel tap" data-open="${open}"><h2>${title} <span class="chev">›</span></h2><div class="hint">${hint}</div><div class="chart-box"><canvas id="${id}"></canvas></div></div>`; }
 
-/* ---------------- chart drawers (accept a list of runs) ---------------- */
+/* ---------------- chart drawers ---------------- */
 function drawVolume(id, runs){ runs=runs||runsSorted();
-  const wk={}; runs.forEach(r=>{const k=wkKey(r.d); wk[k]=wk[k]||{km:0,n:0}; wk[k].km+=r.m/1000; wk[k].n++;});
-  const weeks=Object.keys(wk).sort();
-  charts.push(new Chart(document.getElementById(id),{type:"bar",data:{labels:weeks.map(wkLbl),datasets:[{data:weeks.map(k=>+wk[k].km.toFixed(1)),backgroundColor:"#4f46e5",borderRadius:6}]},options:{...co,scales:{x:gx,y:{...gx,beginAtZero:true}}}}));
-}
+  const wk={}; runs.forEach(r=>{const k=wkKey(r.d); wk[k]=(wk[k]||0)+r.m/1000;}); const weeks=Object.keys(wk).sort();
+  charts.push(new Chart(document.getElementById(id),{type:"bar",data:{labels:weeks.map(wkLbl),datasets:[{data:weeks.map(k=>+wk[k].toFixed(1)),backgroundColor:"#4f46e5",borderRadius:6}]},options:{...co,scales:{x:gx,y:{...gx,beginAtZero:true}}}})); }
 function drawPace(id, runs){ runs=runs||runsSorted();
-  charts.push(new Chart(document.getElementById(id),{type:"line",data:{labels:runs.map(r=>md(r.d)),datasets:[{data:runs.map(r=>+(1000/r.mps/60).toFixed(3)),borderColor:"#0ea5e9",backgroundColor:"rgba(14,165,233,.12)",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:runs.map(r=>r.g?"#0ea5e9":"#c0392b")}]},options:{...co,plugins:{...co.plugins,tooltip:{callbacks:{label:c=>{const m=Math.floor(c.raw),s=Math.round((c.raw-m)*60);return m+":"+String(s).padStart(2,"0")+"/km"+(runs[c.dataIndex].g?"":" (no GPS)");}}}},scales:{x:gx,y:{...gx,reverse:true}}}}));
-}
+  charts.push(new Chart(document.getElementById(id),{type:"line",data:{labels:runs.map(r=>md(r.d)),datasets:[{data:runs.map(r=>+(1000/r.mps/60).toFixed(3)),borderColor:"#0ea5e9",backgroundColor:"rgba(14,165,233,.12)",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:runs.map(r=>r.g?"#0ea5e9":"#c0392b")}]},options:{...co,plugins:{...co.plugins,tooltip:{callbacks:{label:c=>{const m=Math.floor(c.raw),s=Math.round((c.raw-m)*60);return m+":"+String(s).padStart(2,"0")+"/km"+(runs[c.dataIndex].g?"":" (no GPS)");}}}},scales:{x:gx,y:{...gx,reverse:true}}}})); }
 function drawCadence(id, runs){ runs=runs||runsSorted();
-  charts.push(new Chart(document.getElementById(id),{type:"line",data:{labels:runs.map(r=>md(r.d)),datasets:[{data:runs.map(r=>r.c),borderColor:"#16a34a",backgroundColor:"rgba(22,163,74,.12)",fill:true,tension:.3,pointRadius:2}]},options:{...co,scales:{x:gx,y:gx}}}));
-}
-function drawLoad(id, runs){ runs=runs||runsSorted();
-  const wk={}; runs.forEach(r=>{const k=wkKey(r.d); wk[k]=(wk[k]||0)+r.e;});
-  const weeks=Object.keys(wk).sort();
-  charts.push(new Chart(document.getElementById(id),{type:"bar",data:{labels:weeks.map(wkLbl),datasets:[{data:weeks.map(k=>wk[k]),backgroundColor:"#f59e0b",borderRadius:6}]},options:{...co,scales:{x:gx,y:{...gx,beginAtZero:true}}}}));
-}
+  charts.push(new Chart(document.getElementById(id),{type:"line",data:{labels:runs.map(r=>md(r.d)),datasets:[{data:runs.map(r=>r.c),borderColor:"#16a34a",backgroundColor:"rgba(22,163,74,.12)",fill:true,tension:.3,pointRadius:2}]},options:{...co,scales:{x:gx,y:gx}}})); }
+function drawLoadChart(id, wk){ const weeks=Object.keys(wk).sort();
+  charts.push(new Chart(document.getElementById(id),{type:"bar",data:{labels:weeks.map(wkLbl),datasets:[
+    {label:"Runs",data:weeks.map(k=>wk[k].runE),backgroundColor:"#4f46e5",borderRadius:4,stack:"s"},
+    {label:"F45",data:weeks.map(k=>wk[k].f45E),backgroundColor:"#f59e0b",borderRadius:4,stack:"s"}]},
+    options:{...co,plugins:{legend:{display:true,labels:{font:{size:11}}}},scales:{x:{...gx,stacked:true},y:{...gx,stacked:true,beginAtZero:true}}}})); }
+function drawEff(id, runs){ const r=runs.filter(x=>effOf(x)!=null);
+  charts.push(new Chart(document.getElementById(id),{type:"line",data:{labels:r.map(x=>md(x.d)),datasets:[{data:r.map(x=>effOf(x)),borderColor:"#7c3aed",backgroundColor:"rgba(124,58,237,.12)",fill:true,tension:.3,pointRadius:3}]},options:{...co,scales:{x:gx,y:gx}}})); }
 
 /* ---------------- DETAIL ---------------- */
-const TITLES={volume:"Weekly volume",pace:"Pace trend",cadence:"Cadence trend",load:"Training load",recovery:"Recovery",body:"Body composition",runs:"All runs"};
+const TITLES={volume:"Weekly volume",pace:"Pace trend",cadence:"Cadence trend",load:"Training load",recovery:"Recovery",body:"Body composition",runs:"All runs",efficiency:"Aerobic efficiency",f45:"Cross-training · F45"};
 function openDetail(kind){ state.view=kind; renderDetail(); window.scrollTo(0,0); }
 function rangeChips(){ return `<div class="chips">${["4W","12W","All"].map(r=>`<div class="chip ${state.range===r?'on':''}" data-range="${r}">${r==="4W"?"4 weeks":r==="12W"?"12 weeks":"All"}</div>`).join("")}</div>`; }
-
 function renderDetail(){
-  clearCharts();
-  const kind=state.view;
+  clearCharts(); const kind=state.view;
   document.getElementById("topbar").innerHTML=`<button class="back" data-back>‹ Back</button><h1 style="font-size:19px">${TITLES[kind]||""}</h1>`;
-  let h="";
-  if(kind!=="runs") h+=rangeChips();
+  let h=""; if(kind!=="runs"&&kind!=="f45") h+=rangeChips();
 
-  if(kind==="volume"||kind==="pace"||kind==="cadence"||kind==="load"){
+  if(kind==="volume"||kind==="pace"||kind==="cadence"){
     const runs=runsInRange();
     h+=`<div class="panel"><div class="chart-box tall"><canvas id="dc"></canvas></div></div>`;
-    if(kind==="volume"||kind==="load"){
-      const wk={}; runs.forEach(r=>{const k=wkKey(r.d); wk[k]=wk[k]||{km:0,e:0,n:0}; wk[k].km+=r.m/1000; wk[k].e+=r.e; wk[k].n++;});
-      const weeks=Object.keys(wk).sort().reverse();
-      h+=`<div class="panel"><table><thead><tr><th>Week of</th><th>Runs</th><th>km</th><th>Effort</th></tr></thead><tbody>`+
-        weeks.map(k=>`<tr><td>${wkLbl(k)}</td><td>${wk[k].n}</td><td>${wk[k].km.toFixed(1)}</td><td>${wk[k].e}</td></tr>`).join("")+`</tbody></table></div>`;
-    } else {
-      const rev=runs.slice().reverse();
-      h+=`<div class="panel"><table><thead><tr><th>Date</th><th>Dist</th><th>Pace</th><th>Cad</th><th>Temp</th></tr></thead><tbody>`+
-        rev.map(r=>`<tr><td>${md(r.d)}</td><td>${(r.m/1000).toFixed(1)}</td><td>${fmtPace(r.mps)}</td><td>${r.c||"–"}</td><td>${r.wx&&r.wx.t!=null?Math.round(r.wx.t)+"°":"–"}</td></tr>`).join("")+`</tbody></table></div>`;
-    }
+    const rev=runs.slice().reverse();
+    h+=`<div class="panel"><table><thead><tr><th>Date</th><th>Dist</th><th>Pace</th><th>HR</th><th>Cad</th><th>Temp</th></tr></thead><tbody>`+
+      rev.map(r=>`<tr><td>${md(r.d)}</td><td>${(r.m/1000).toFixed(1)}</td><td>${fmtPace(r.mps)}</td><td>${r.hr||"–"}</td><td>${r.c||"–"}</td><td>${r.wx&&r.wx.t!=null?Math.round(r.wx.t)+"°":"–"}</td></tr>`).join("")+`</tbody></table></div>`;
     document.getElementById("content").innerHTML=h;
-    if(kind==="volume") drawVolume("dc",runs);
-    if(kind==="pace") drawPace("dc",runs);
-    if(kind==="cadence") drawCadence("dc",runs);
-    if(kind==="load") drawLoad("dc",runs);
+    if(kind==="volume") drawVolume("dc",runs); if(kind==="pace") drawPace("dc",runs); if(kind==="cadence") drawCadence("dc",runs);
     return;
   }
-
+  if(kind==="load"){
+    const runs=runsInRange(); const works=(state.workouts||[]).filter(w=>inRange(w.d));
+    const wk=weeklyFrom(runs,works); const weeks=Object.keys(wk).sort().reverse(); const acwr=computeAcwr();
+    h+=`<div class="panel"><div class="hint">Weekly relative effort — runs (purple) + F45 (amber)${acwr!=null?` · acute:chronic ratio <b>${acwr}</b> (${acwr>1.5?"high — ease off":acwr<0.8?"light":"balanced"})`:""}</div><div class="chart-box tall"><canvas id="dc"></canvas></div></div>`;
+    h+=`<div class="panel"><table><thead><tr><th>Week of</th><th>Runs</th><th>Run load</th><th>F45</th><th>F45 load</th><th>Total</th></tr></thead><tbody>`+
+      weeks.map(k=>`<tr><td>${wkLbl(k)}</td><td>${wk[k].n}</td><td>${wk[k].runE}</td><td>${wk[k].f45n}</td><td>${wk[k].f45E}</td><td>${wk[k].runE+wk[k].f45E}</td></tr>`).join("")+`</tbody></table>
+      <div class="muted">Acute:chronic workload ratio compares this week's total load to your recent average. Above ~1.5 means a spike (injury risk); 0.8–1.3 is a healthy build.</div></div>`;
+    document.getElementById("content").innerHTML=h; drawLoadChart("dc",wk); return;
+  }
+  if(kind==="efficiency"){
+    const runs=runsInRange().filter(r=>effOf(r)!=null);
+    h+=`<div class="panel"><div class="hint">Speed per heartbeat (m/s ÷ HR ×1000). Rising = same speed at a lower heart rate = improving aerobic fitness.</div><div class="chart-box tall"><canvas id="dc"></canvas></div></div>`;
+    const rev=runs.slice().reverse();
+    h+=`<div class="panel"><table><thead><tr><th>Date</th><th>Pace</th><th>Avg HR</th><th>Efficiency</th></tr></thead><tbody>`+
+      rev.map(r=>`<tr><td>${md(r.d)}</td><td>${fmtPace(r.mps)}</td><td>${r.hr}</td><td>${effOf(r)}</td></tr>`).join("")+`</tbody></table></div>`;
+    document.getElementById("content").innerHTML=h; drawEff("dc",runs); return;
+  }
   if(kind==="recovery"){
     const days=(state.oura&&state.oura.days||[]).filter(x=>inRange(x.day));
     h+=`<div class="panel"><div class="hint">Readiness &amp; sleep score</div><div class="chart-box tall"><canvas id="dc"></canvas></div></div>`;
@@ -230,10 +286,8 @@ function renderDetail(){
     charts.push(new Chart(document.getElementById("dc"),{type:"line",data:{labels:days.map(x=>md(x.day)),datasets:[
       {label:"Readiness",data:days.map(x=>x.readiness??null),borderColor:"#4f46e5",tension:.3,pointRadius:2,spanGaps:true},
       {label:"Sleep",data:days.map(x=>x.sleep??null),borderColor:"#0ea5e9",tension:.3,pointRadius:2,spanGaps:true}]},
-      options:{...co,plugins:{legend:{display:true,labels:{font:{size:11}}}},scales:{x:gx,y:{...gx,beginAtZero:true,max:100}}}}));
-    return;
+      options:{...co,plugins:{legend:{display:true,labels:{font:{size:11}}}},scales:{x:gx,y:{...gx,beginAtZero:true,max:100}}}})); return;
   }
-
   if(kind==="body"){
     const s=(state.withings&&state.withings.series||[]).filter(x=>inRange(x.date));
     h+=`<div class="panel"><div class="hint">Weight (kg)</div><div class="chart-box tall"><canvas id="dc"></canvas></div></div>`;
@@ -241,40 +295,72 @@ function renderDetail(){
     h+=`<div class="panel"><table><thead><tr><th>Date</th><th>Weight</th><th>Fat %</th><th>Muscle</th></tr></thead><tbody>`+
       rev.map(x=>`<tr><td>${md(x.date)}</td><td>${x.weight??"–"}</td><td>${x.fat??"–"}</td><td>${x.muscle??"–"}</td></tr>`).join("")+`</tbody></table></div>`;
     document.getElementById("content").innerHTML=h;
-    charts.push(new Chart(document.getElementById("dc"),{type:"line",data:{labels:s.map(x=>md(x.date)),datasets:[{data:s.map(x=>x.weight??null),borderColor:"#4f46e5",backgroundColor:"rgba(79,70,229,.12)",fill:true,tension:.3,pointRadius:2,spanGaps:true}]},options:{...co,scales:{x:gx,y:gx}}}));
-    return;
+    charts.push(new Chart(document.getElementById("dc"),{type:"line",data:{labels:s.map(x=>md(x.date)),datasets:[{data:s.map(x=>x.weight??null),borderColor:"#4f46e5",backgroundColor:"rgba(79,70,229,.12)",fill:true,tension:.3,pointRadius:2,spanGaps:true}]},options:{...co,scales:{x:gx,y:gx}}})); return;
   }
-
+  if(kind==="f45"){
+    const list=(state.workouts||[]).slice().sort((a,b)=>new Date(a.d)-new Date(b.d));
+    const wk={}; list.forEach(w=>{const k=wkKey(w.d); wk[k]=(wk[k]||0)+1;}); const weeks=Object.keys(wk).sort();
+    h+=`<div class="panel"><div class="hint">Sessions per week</div><div class="chart-box"><canvas id="dc"></canvas></div></div>`;
+    const rev=list.slice().reverse();
+    h+=`<div class="panel"><table><thead><tr><th>Date</th><th>Type</th><th>Duration</th><th>Avg HR</th><th>Load</th></tr></thead><tbody>`+
+      rev.map(w=>`<tr><td>${md(w.d)}</td><td>${w.type||"Workout"}</td><td>${fmtDur(w.t)}</td><td>${w.hr||"–"}</td><td>${w.e||"–"}</td></tr>`).join("")+`</tbody></table>
+      <div class="muted">These are your F45 classes. They carry real heart-rate load and recovery cost, so they're counted in your training load and the coach's advice.</div></div>`;
+    document.getElementById("content").innerHTML=h;
+    charts.push(new Chart(document.getElementById("dc"),{type:"bar",data:{labels:weeks.map(wkLbl),datasets:[{data:weeks.map(k=>wk[k]),backgroundColor:"#f59e0b",borderRadius:6}]},options:{...co,scales:{x:gx,y:{...gx,beginAtZero:true}}}})); return;
+  }
   if(kind==="runs"){
-    const buckets={all:()=>true, "5k":r=>r.m>=4500&&r.m<=5500, "10k":r=>r.m>=9000&&r.m<=11000, long:r=>r.m>12000};
+    const buckets={all:()=>true,"5k":r=>r.m>=4500&&r.m<=5500,"10k":r=>r.m>=9000&&r.m<=11000,long:r=>r.m>12000};
     h+=`<div class="chips">${[["all","All"],["5k","~5k"],["10k","~10k"],["long","Long (12k+)"]].map(([k,lab])=>`<div class="chip ${state.rf===k?'on':''}" data-filter="${k}">${lab}</div>`).join("")}</div>`;
     const list=runsSorted().filter(buckets[state.rf]).reverse();
-    const cnt=list.length, km=list.reduce((s,r)=>s+r.m,0)/1000;
-    h+=`<div class="section-title">${cnt} runs · ${km.toFixed(0)} km</div>`;
-    h+=`<div class="panel"><table><thead><tr><th>Date</th><th>Dist</th><th>Time</th><th>Pace</th><th>Cad</th><th>Temp</th><th>GPS</th></tr></thead><tbody>`+
-      list.map(r=>`<tr><td>${md(r.d)}</td><td>${(r.m/1000).toFixed(2)}</td><td>${fmtDur(r.t)}</td><td>${fmtPace(r.mps)}</td><td>${r.c||"–"}</td><td>${r.wx&&r.wx.t!=null?Math.round(r.wx.t)+"°":"–"}</td><td>${r.g?'<span class="pill ok">yes</span>':'<span class="pill no">no</span>'}</td></tr>`).join("")+
-      `</tbody></table><div class="muted">Filter by distance to compare like-for-like efforts. Same-distance runs on your usual routes track fitness directly.</div></div>`;
-    document.getElementById("content").innerHTML=h;
-    return;
+    h+=`<div class="section-title">${list.length} runs · ${(list.reduce((s,r)=>s+r.m,0)/1000).toFixed(0)} km</div>`;
+    h+=`<div class="panel"><table><thead><tr><th>Date</th><th>Dist</th><th>Time</th><th>Pace</th><th>HR</th><th>Cad</th><th>Temp</th><th>GPS</th></tr></thead><tbody>`+
+      list.map(r=>`<tr><td>${md(r.d)}</td><td>${(r.m/1000).toFixed(2)}</td><td>${fmtDur(r.t)}</td><td>${fmtPace(r.mps)}</td><td>${r.hr||"–"}</td><td>${r.c||"–"}</td><td>${r.wx&&r.wx.t!=null?Math.round(r.wx.t)+"°":"–"}</td><td>${r.g?'<span class="pill ok">yes</span>':'<span class="pill no">no</span>'}</td></tr>`).join("")+
+      `</tbody></table></div>`;
+    document.getElementById("content").innerHTML=h; return;
   }
+}
+
+/* ---------------- coach calls ---------------- */
+async function loadCoach(){
+  const el=document.getElementById("coachText"); if(!el) return;
+  const key="coach:"+md0(anchor());
+  try{ const c=localStorage.getItem(key); if(c){ el.textContent=c; return; } }catch(e){}
+  try{
+    const r=await fetch("/api/coach",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stats:buildStats()})});
+    const j=await r.json();
+    if(j&&j.ok&&j.text){ el.textContent=j.text; try{localStorage.setItem(key,j.text);}catch(e){} return; }
+  }catch(e){}
+  el.textContent=coachNote();
+}
+async function askCoach(){
+  const inp=document.getElementById("coachQ"), ans=document.getElementById("coachAns");
+  if(!inp||!ans) return; const q=inp.value.trim(); if(!q) return;
+  ans.textContent="Thinking…";
+  try{
+    const r=await fetch("/api/coach",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stats:buildStats(),question:q})});
+    const j=await r.json();
+    ans.textContent=(j&&j.ok&&j.text)?j.text:"The AI coach isn't switched on yet (needs the API key). The read above still works.";
+  }catch(e){ ans.textContent="Couldn't reach the coach right now."; }
 }
 
 /* ---------------- events + boot ---------------- */
 document.addEventListener("click",(e)=>{
+  const ask=e.target.closest("[data-ask]"); if(ask){ askCoach(); return; }
   const o=e.target.closest("[data-open]"); if(o){ openDetail(o.getAttribute("data-open")); return; }
   const r=e.target.closest("[data-range]"); if(r){ state.range=r.getAttribute("data-range"); renderDetail(); return; }
   const f=e.target.closest("[data-filter]"); if(f){ state.rf=f.getAttribute("data-filter"); renderDetail(); return; }
   const b=e.target.closest("[data-back]"); if(b){ state.view="home"; state.range="12W"; renderHome(); return; }
 });
+document.addEventListener("keydown",(e)=>{ if(e.key==="Enter" && e.target && e.target.id==="coachQ"){ askCoach(); } });
 
 async function boot(){
   try{ const o=await fetch("/api/oura",{credentials:"same-origin"}); if(o.ok) state.oura=await o.json(); }catch(e){}
   try{ const w=await fetch("/api/withings/measures",{credentials:"same-origin"}); if(w.ok) state.withings=await w.json(); }catch(e){}
   try{
     const res=await fetch("/api/strava/activities",{credentials:"same-origin"});
-    if(res.ok){ const data=await res.json(); if(data.runs&&data.runs.length){ state.runs=data.runs; state.live=true; renderHome(); return; } }
+    if(res.ok){ const data=await res.json(); if(data.runs&&data.runs.length){ state.runs=data.runs; state.workouts=data.workouts||[]; state.live=true; renderHome(); return; } }
   }catch(e){}
-  state.runs=DEMO; state.live=false; renderHome();
+  state.runs=DEMO_RUNS; state.workouts=DEMO_WK; state.live=false; renderHome();
 }
 boot();
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
