@@ -98,7 +98,18 @@ function coachNote(runs){
 const card=(k,v)=>`<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`;
 const panel=(t,h,id)=>`<div class="panel"><h2>${t}</h2><div class="hint">${h}</div><div class="chart-box"><canvas id="${id}"></canvas></div></div>`;
 
-function render(RUNS, live){
+function recoveryPanel(oura){
+  if(!oura||!oura.connected||!oura.days||!oura.days.length) return "";
+  const l=oura.days[oura.days.length-1];
+  const r=l.readiness,sc=l.sleep,hrv=l.hrv,rhr=l.rhr;
+  let note="";
+  if(r!=null){ note = r>=85?"You're well recovered — a good day for a hard session.":r>=70?"Moderate readiness — fine for steady running, ease off if it feels flat.":"Low readiness — favour an easy day or rest."; }
+  return `<div class="panel"><h2>Recovery <span class="hint">latest from Oura · ${l.day.slice(5)}</span></h2>
+    <div class="cards" style="margin-top:8px">${card("Readiness",r!=null?r:"–")}${card("Sleep",sc!=null?sc:"–")}${card("HRV",hrv!=null?hrv+' <small>ms</small>':"–")}${card("Resting HR",rhr!=null?rhr+' <small>bpm</small>':"–")}</div>
+    ${note?`<div class="muted" style="margin-top:4px">${note}</div>`:""}</div>`;
+}
+
+function render(RUNS, live, oura){
   const runs=RUNS.slice().sort((a,b)=>new Date(a.d)-new Date(b.d));
   if(!runs.length){ document.getElementById("content").innerHTML='<div class="loading">No runs found yet.</div>'; return; }
   const totalM=runs.reduce((s,r)=>s+r.m,0),totalT=runs.reduce((s,r)=>s+r.t,0);
@@ -117,6 +128,7 @@ function render(RUNS, live){
   }
   h+=`<div class="cards">${card("Runs",runs.length)}${card("Distance",(totalM/1000).toFixed(0)+' <small>km</small>')}${card("Time",fmtDur(totalT))}${card("Avg pace",fmtPace(avgMps)+' <small>/km</small>')}</div>`;
   if(noGps.length) h+=`<div class="banner warn">⚠️ <b>${noGps.length} recent run(s) recorded without GPS</b> — distance was watch-estimated, so their pace is approximate.</div>`;
+  h+=recoveryPanel(oura);
   h+=`<div class="panel ai"><h2>🧠 Coach's read <span class="badge">v1</span></h2><p>${coachNote(runs)}</p></div>`;
   h+=panel("Weekly volume","kilometres per week","wk");
   h+=panel("Pace trend","per run · higher = faster · red = no GPS","pc");
@@ -140,14 +152,16 @@ function render(RUNS, live){
 }
 
 async function boot(){
+  let oura=null;
+  try{ const o=await fetch("/api/oura",{credentials:"same-origin"}); if(o.ok) oura=await o.json(); }catch(e){}
   try{
     const res=await fetch("/api/strava/activities",{credentials:"same-origin"});
     if(res.ok){
       const data=await res.json();
-      if(data.runs && data.runs.length){ render(data.runs, true); return; }
+      if(data.runs && data.runs.length){ render(data.runs, true, oura); return; }
     }
   }catch(e){/* offline or not deployed yet */}
-  render(DEMO, false); // fallback: demo data + Connect button
+  render(DEMO, false, oura); // fallback: demo data + Connect button
 }
 boot();
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
