@@ -109,7 +109,17 @@ function recoveryPanel(oura){
     ${note?`<div class="muted" style="margin-top:4px">${note}</div>`:""}</div>`;
 }
 
-function render(RUNS, live, oura){
+function bodyPanel(w, live){
+  if(w && w.connected && w.series && w.series.length){
+    const l=w.series[w.series.length-1];
+    return `<div class="panel"><h2>Body composition <span class="hint">latest from Withings · ${l.date.slice(5)}</span></h2>
+      <div class="cards" style="margin-top:8px">${card("Weight",l.weight!=null?l.weight+' <small>kg</small>':"–")}${card("Body fat",l.fat!=null?l.fat+' <small>%</small>':"–")}${card("Muscle",l.muscle!=null?l.muscle+' <small>kg</small>':"–")}${card("Fat mass",l.fatmass!=null?l.fatmass+' <small>kg</small>':"–")}</div></div>`;
+  }
+  if(live) return `<div class="banner connect"><span class="t">Add body-composition trends from your Withings scale.</span><a class="btn" style="background:#00a6de" href="/api/withings/login">Connect Withings</a></div>`;
+  return "";
+}
+
+function render(RUNS, live, oura, withings){
   const runs=RUNS.slice().sort((a,b)=>new Date(a.d)-new Date(b.d));
   if(!runs.length){ document.getElementById("content").innerHTML='<div class="loading">No runs found yet.</div>'; return; }
   const totalM=runs.reduce((s,r)=>s+r.m,0),totalT=runs.reduce((s,r)=>s+r.t,0);
@@ -129,6 +139,7 @@ function render(RUNS, live, oura){
   h+=`<div class="cards">${card("Runs",runs.length)}${card("Distance",(totalM/1000).toFixed(0)+' <small>km</small>')}${card("Time",fmtDur(totalT))}${card("Avg pace",fmtPace(avgMps)+' <small>/km</small>')}</div>`;
   if(noGps.length) h+=`<div class="banner warn">⚠️ <b>${noGps.length} recent run(s) recorded without GPS</b> — distance was watch-estimated, so their pace is approximate.</div>`;
   h+=recoveryPanel(oura);
+  h+=bodyPanel(withings, live);
   h+=`<div class="panel ai"><h2>🧠 Coach's read <span class="badge">v1</span></h2><p>${coachNote(runs)}</p></div>`;
   h+=panel("Weekly volume","kilometres per week","wk");
   h+=panel("Pace trend","per run · higher = faster · red = no GPS","pc");
@@ -152,16 +163,17 @@ function render(RUNS, live, oura){
 }
 
 async function boot(){
-  let oura=null;
+  let oura=null, withings=null;
   try{ const o=await fetch("/api/oura",{credentials:"same-origin"}); if(o.ok) oura=await o.json(); }catch(e){}
+  try{ const w=await fetch("/api/withings/measures",{credentials:"same-origin"}); if(w.ok) withings=await w.json(); }catch(e){}
   try{
     const res=await fetch("/api/strava/activities",{credentials:"same-origin"});
     if(res.ok){
       const data=await res.json();
-      if(data.runs && data.runs.length){ render(data.runs, true, oura); return; }
+      if(data.runs && data.runs.length){ render(data.runs, true, oura, withings); return; }
     }
   }catch(e){/* offline or not deployed yet */}
-  render(DEMO, false, oura); // fallback: demo data + Connect button
+  render(DEMO, false, oura, withings); // fallback: demo data + Connect button
 }
 boot();
 if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
