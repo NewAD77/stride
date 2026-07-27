@@ -42,11 +42,28 @@ export default async function handler(req, res) {
     const ar = await fetch("https://www.strava.com/api/v3/athlete/activities?per_page=100", { headers: { Authorization: "Bearer " + t.access_token } });
     const acts = await ar.json();
     if (!Array.isArray(acts)) { res.status(502).json({ error: "strava_error", detail: acts }); return; }
-    const runs = acts.filter((a) => a.type === "Run" && a.distance > 0).map((a) => ({ d: (a.start_date_local || "").slice(0, 10), m: a.distance, t: a.moving_time, mps: a.average_speed, c: a.average_cadence ? Math.round(a.average_cadence) : 0, e: a.suffer_score || 0, el: a.total_elevation_gain || 0, g: !!(a.map && a.map.summary_polyline && a.map.summary_polyline.length > 1) || (Array.isArray(a.start_latlng) && a.start_latlng.length === 2), ll: Array.isArray(a.start_latlng) && a.start_latlng.length === 2 ? a.start_latlng : null }));
+
+    const runs = acts.filter((a) => a.type === "Run" && a.distance > 0).map((a) => ({
+      d: (a.start_date_local || "").slice(0, 10), m: a.distance, t: a.moving_time, mps: a.average_speed,
+      c: a.average_cadence ? Math.round(a.average_cadence) : 0, e: a.suffer_score || 0, el: a.total_elevation_gain || 0,
+      hr: a.average_heartrate ? Math.round(a.average_heartrate) : null, hrmax: a.max_heartrate ? Math.round(a.max_heartrate) : null,
+      g: !!(a.map && a.map.summary_polyline && a.map.summary_polyline.length > 1) || (Array.isArray(a.start_latlng) && a.start_latlng.length === 2),
+      ll: Array.isArray(a.start_latlng) && a.start_latlng.length === 2 ? a.start_latlng : null,
+    }));
+
+    // F45 / cross-training: any non-run/walk/hike session of 10+ minutes (the user logs F45 as "Workout"/"cardio")
+    const skip = { Run: 1, Walk: 1, Hike: 1 };
+    const workouts = acts.filter((a) => !skip[a.type] && (a.moving_time || 0) >= 600).map((a) => ({
+      d: (a.start_date_local || "").slice(0, 10), t: a.moving_time, e: a.suffer_score || 0,
+      hr: a.average_heartrate ? Math.round(a.average_heartrate) : null, hrmax: a.max_heartrate ? Math.round(a.max_heartrate) : null,
+      name: a.name || "", type: a.type || "Workout",
+    }));
+
     const recent = runs.slice(0, 14);
     await Promise.all(recent.map(async (r) => { if (r.ll) { const w = await fetchWeather(r.ll[0], r.ll[1], r.d); if (w) r.wx = w; } }));
+
     res.setHeader("Cache-Control", "no-store");
-    res.status(200).json({ runs });
+    res.status(200).json({ runs, workouts });
   } catch (e) {
     res.status(500).json({ error: "server_error" });
   }
