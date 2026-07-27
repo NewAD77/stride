@@ -90,6 +90,8 @@ function coachNote(runs){
   let s=`Over these ${n} runs you covered ${km.toFixed(0)} km with steady, repeatable volume. `;
   s+=`Cadence averages about ${cad} spm`+(fastest?`, and your sharpest well-tracked 5k pace was around ${fmtPace(fastest.mps)}/km. `:`. `);
   if(noGps) s+=`Note: ${noGps} recent run(s) recorded without GPS, so their pace is an estimate — treat lightly until that's fixed. `;
+  const hot=runs.filter(r=>r.wx&&r.wx.tmax!=null).reduce((a,b)=>(a&&a.wx.tmax>=b.wx.tmax?a:b),null);
+  if(hot&&hot.wx.tmax>=25) s+=`Your ${hot.d.slice(5)} run hit about ${Math.round(hot.wx.tmax)}°C — heat like that adds ~10–20 sec/km, so don't read a hot-day slowdown as lost fitness. `;
   s+=`Next focus: keep easy days truly easy so hard days deliver more.`;
   return s;
 }
@@ -122,8 +124,8 @@ function render(RUNS, live){
   h+=panel("Training load","weekly relative effort","ld");
   if(fivek.length){
     h+=`<div class="panel"><h2>Same-route 5k</h2><div class="hint">your repeated ~5&nbsp;km loop</div>
-      <table style="margin-top:10px"><thead><tr><th>Date</th><th>Pace</th><th>Cad</th><th>Effort</th><th>GPS</th></tr></thead><tbody>`+
-      fivek.map(r=>`<tr><td>${r.d.slice(5)}</td><td>${fmtPace(r.mps)}</td><td>${r.c||"–"}</td><td>${r.e}</td><td>${r.g?'<span class="pill ok">yes</span>':'<span class="pill no">no</span>'}</td></tr>`).join("")+
+      <table style="margin-top:10px"><thead><tr><th>Date</th><th>Pace</th><th>Cad</th><th>Temp</th><th>Effort</th><th>GPS</th></tr></thead><tbody>`+
+      fivek.map(r=>`<tr><td>${r.d.slice(5)}</td><td>${fmtPace(r.mps)}</td><td>${r.c||"–"}</td><td>${r.wx&&r.wx.t!=null?Math.round(r.wx.t)+"°":"–"}</td><td>${r.e}</td><td>${r.g?'<span class="pill ok">yes</span>':'<span class="pill no">no</span>'}</td></tr>`).join("")+
       `</tbody></table><div class="muted">Same terrain each time, so pace &amp; effort track fitness directly.</div></div>`;
   }
   h+=`<div class="foot"><b>Stride</b> · ${live?'live from Strava':'demo mode'}.<br>Next: Oura · Withings · weather · AI coach.</div>`;
