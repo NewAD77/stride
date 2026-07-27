@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stride</title>
+<meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Stride">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js"></script>
+<style>
+:root { color-scheme: light; --indigo:#4f46e5; --violet:#7c3aed; }
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { margin:0; background:#f4f5f8; color:#161a1f;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+.topbar { background:linear-gradient(135deg,var(--indigo),var(--violet)); color:#fff;
+  padding:calc(env(safe-area-inset-top) + 16px) 18px 18px; }
+.topbar h1 { margin:0; font-size:22px; }
+.topbar .sub { opacity:.85; font-size:13px; margin-top:2px; }
+.wrap { padding:16px 14px 90px; max-width:640px; margin:0 auto; }
+.cards { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-bottom:14px; }
+.card { background:#fff; border:1px solid #e7e9ee; border-radius:16px; padding:13px 15px; }
+.card .k { font-size:11px; color:#7a828c; text-transform:uppercase; letter-spacing:.05em; }
+.card .v { font-size:24px; font-weight:680; margin-top:3px; }
+.card .v small { font-size:13px; font-weight:500; color:#7a828c; }
+.panel { background:#fff; border:1px solid #e7e9ee; border-radius:16px; padding:15px 16px; margin-bottom:14px; }
+.panel h2 { font-size:14px; margin:0 0 4px; }
+.panel .hint { font-size:11px; color:#9aa0a8; }
+.chart-box { position:relative; height:200px; margin-top:8px; }
+.ai { background:linear-gradient(135deg,#eef0ff,#f6f2ff); border-color:#e2e3f6; }
+.ai h2 { display:flex; align-items:center; gap:7px; }
+.ai .badge { font-size:9px; background:var(--indigo); color:#fff; padding:2px 7px; border-radius:20px; }
+.ai p { margin:0; font-size:14.5px; line-height:1.5; }
+.banner { border-radius:14px; padding:12px 14px; margin-bottom:14px; font-size:13.5px; line-height:1.45; }
+.banner.warn { background:#fff8e6; border:1px solid #f3dd93; color:#7a5b00; }
+.banner.connect { background:#fff; border:1px solid #e2e3f6; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.banner.connect .t { font-size:13px; color:#4a4f57; }
+.btn { background:#fc4c02; color:#fff; text-decoration:none; font-weight:650; font-size:14px;
+  padding:10px 16px; border-radius:12px; white-space:nowrap; display:inline-block; }
+.tag { display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; letter-spacing:.05em; }
+.tag.live { background:#e7f6ec; color:#177245; } .tag.demo { background:#eef0f3; color:#7a828c; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th,td { text-align:right; padding:7px 6px; border-bottom:1px solid #eef0f3; white-space:nowrap; }
+th:first-child,td:first-child { text-align:left; }
+th { color:#7a828c; font-weight:600; font-size:10px; text-transform:uppercase; }
+.pill { display:inline-block; padding:1px 7px; border-radius:20px; font-size:11px; font-weight:600; }
+.pill.ok { background:#e7f6ec; color:#177245; } .pill.no { background:#fdecec; color:#c0392b; }
+.muted { color:#9aa0a8; font-size:11.5px; margin-top:8px; }
+.foot { text-align:center; color:#aab0b8; font-size:11px; margin-top:18px; }
+.loading { text-align:center; color:#8a9099; padding:40px 0; }
+</style>
+</head>
+<body>
+<div class="topbar"><h1>Stride</h1><div class="sub" id="sub">Loading…</div></div>
+<div class="wrap" id="content"><div class="loading">Checking your Strava connection…</div></div>
+
+<script>
+/* Demo data used only until you connect Strava. */
+const DEMO = [
+ {d:"2026-05-02",m:8011,t:3164,mps:2.532,c:79,e:116,el:64,g:true},
+ {d:"2026-05-06",m:9223,t:3361,mps:2.744,c:79,e:266,el:68,g:true},
+ {d:"2026-05-09",m:16012,t:5797,mps:2.762,c:82,e:367,el:102,g:true},
+ {d:"2026-05-13",m:7752,t:2652,mps:2.923,c:82,e:167,el:67,g:true},
+ {d:"2026-05-17",m:12009,t:4445,mps:2.702,c:81,e:148,el:77,g:true},
+ {d:"2026-05-20",m:6734,t:2453,mps:2.745,c:81,e:132,el:45,g:true},
+ {d:"2026-05-23",m:9011,t:3320,mps:2.714,c:81,e:209,el:101,g:true},
+ {d:"2026-05-31",m:21330,t:7647,mps:2.789,c:81,e:574,el:256,g:true},
+ {d:"2026-06-06",m:5027,t:1833,mps:2.743,c:80,e:30,el:28,g:true},
+ {d:"2026-06-13",m:5019,t:1698,mps:2.956,c:85,e:119,el:23,g:true},
+ {d:"2026-06-17",m:5012,t:1716,mps:2.921,c:83,e:116,el:25,g:true},
+ {d:"2026-06-24",m:5017,t:1677,mps:2.992,c:84,e:104,el:37,g:true},
+ {d:"2026-07-22",m:5015,t:1788,mps:2.805,c:81,e:29,el:0,g:false},
+ {d:"2026-07-24",m:10008,t:3711,mps:2.697,c:79,e:171,el:0,g:false},
+ {d:"2026-07-26",m:5020,t:1958,mps:2.564,c:77,e:49,el:0,g:false}
+];
+
+const fmtPace=m=>{if(!m)return"–";const s=1000/m,x=Math.floor(s/60),y=Math.round(s-x*60);return x+":"+String(y).padStart(2,"0");};
+const fmtDur=s=>{const h=Math.floor(s/3600),m=Math.round((s-h*3600)/60);return h>0?h+"h "+m+"m":m+"m";};
+function wkKey(d){const t=new Date(d);const day=(t.getDay()+6)%7;t.setDate(t.getDate()-day);
+  return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");}
+const wkLbl=k=>{const p=k.split("-");return p[1]+"/"+p[2];};
+
+function coachNote(runs){
+  const n=runs.length,km=runs.reduce((s,r)=>s+r.m,0)/1000,cad=Math.round(runs.reduce((s,r)=>s+r.c,0)/n);
+  const gps=runs.filter(r=>r.g),noGps=runs.filter(r=>!r.g).length;
+  const fastest=gps.length?gps.reduce((a,b)=>b.mps>a.mps?b:a):runs[0];
+  let s=`Over these ${n} runs you covered ${km.toFixed(0)} km with steady, repeatable volume. `;
+  s+=`Cadence averages about ${cad} spm`+(fastest?`, and your sharpest well-tracked 5k pace was around ${fmtPace(fastest.mps)}/km. `:`. `);
+  if(noGps) s+=`Note: ${noGps} recent run(s) recorded without GPS, so their pace is an estimate — treat lightly until that's fixed. `;
+  s+=`Next focus: keep easy days truly easy so hard days deliver more.`;
+  return s;
+}
+const card=(k,v)=>`<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`;
+const panel=(t,h,id)=>`<div class="panel"><h2>${t}</h2><div class="hint">${h}</div><div class="chart-box"><canvas id="${id}"></canvas></div></div>`;
+
+function render(RUNS, live){
+  const runs=RUNS.slice().sort((a,b)=>new Date(a.d)-new Date(b.d));
+  if(!runs.length){ document.getElementById("content").innerHTML='<div class="loading">No runs found yet.</div>'; return; }
+  const totalM=runs.reduce((s,r)=>s+r.m,0),totalT=runs.reduce((s,r)=>s+r.t,0);
+  const avgMps=totalM/totalT,noGps=runs.filter(r=>!r.g);
+  document.getElementById("sub").innerHTML=runs[0].d+" → "+runs[runs.length-1].d+
+    `  <span class="tag ${live?'live':'demo'}">${live?'LIVE':'DEMO'}</span>`;
+
+  const wk={};runs.forEach(r=>{const k=wkKey(r.d);wk[k]=wk[k]||{km:0,e:0};wk[k].km+=r.m/1000;wk[k].e+=r.e;});
+  const weeks=Object.keys(wk).sort();
+  const fivek=runs.filter(r=>r.m>=4500&&r.m<=5500).slice().reverse();
+
+  let h="";
+  if(!live){
+    h+=`<div class="banner connect"><span class="t">You're seeing demo data. Connect Strava for your live training.</span>
+      <a class="btn" href="/api/strava/login">Connect with Strava</a></div>`;
+  }
+  h+=`<div class="cards">${card("Runs",runs.length)}${card("Distance",(totalM/1000).toFixed(0)+' <small>km</small>')}${card("Time",fmtDur(totalT))}${card("Avg pace",fmtPace(avgMps)+' <small>/km</small>')}</div>`;
+  if(noGps.length) h+=`<div class="banner warn">⚠️ <b>${noGps.length} recent run(s) recorded without GPS</b> — distance was watch-estimated, so their pace is approximate.</div>`;
+  h+=`<div class="panel ai"><h2>🧠 Coach's read <span class="badge">v1</span></h2><p>${coachNote(runs)}</p></div>`;
+  h+=panel("Weekly volume","kilometres per week","wk");
+  h+=panel("Pace trend","per run · higher = faster · red = no GPS","pc");
+  h+=panel("Cadence trend","steps per minute","cd");
+  h+=panel("Training load","weekly relative effort","ld");
+  if(fivek.length){
+    h+=`<div class="panel"><h2>Same-route 5k</h2><div class="hint">your repeated ~5&nbsp;km loop</div>
+      <table style="margin-top:10px"><thead><tr><th>Date</th><th>Pace</th><th>Cad</th><th>Effort</th><th>GPS</th></tr></thead><tbody>`+
+      fivek.map(r=>`<tr><td>${r.d.slice(5)}</td><td>${fmtPace(r.mps)}</td><td>${r.c||"–"}</td><td>${r.e}</td><td>${r.g?'<span class="pill ok">yes</span>':'<span class="pill no">no</span>'}</td></tr>`).join("")+
+      `</tbody></table><div class="muted">Same terrain each time, so pace &amp; effort track fitness directly.</div></div>`;
+  }
+  h+=`<div class="foot"><b>Stride</b> · ${live?'live from Strava':'demo mode'}.<br>Next: Oura · Withings · weather · AI coach.</div>`;
+  document.getElementById("content").innerHTML=h;
+
+  const gx={grid:{color:"#eef0f3"},ticks:{color:"#8a9099",font:{size:10}}};
+  const co={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}};
+  new Chart(wk,{type:"bar",data:{labels:weeks.map(wkLbl),datasets:[{data:weeks.map(k=>+wk[k].km.toFixed(1)),backgroundColor:"#4f46e5",borderRadius:6}]},options:{...co,scales:{x:gx,y:{...gx,beginAtZero:true}}}});
+  new Chart(pc,{type:"line",data:{labels:runs.map(r=>r.d.slice(5)),datasets:[{data:runs.map(r=>+(1000/r.mps/60).toFixed(3)),borderColor:"#0ea5e9",backgroundColor:"rgba(14,165,233,.12)",fill:true,tension:.3,pointRadius:3,pointBackgroundColor:runs.map(r=>r.g?"#0ea5e9":"#c0392b")}]},options:{...co,plugins:{...co.plugins,tooltip:{callbacks:{label:c=>{const m=Math.floor(c.raw),s=Math.round((c.raw-m)*60);return m+":"+String(s).padStart(2,"0")+"/km"+(runs[c.dataIndex].g?"":" (no GPS)");}}}},scales:{x:gx,y:{...gx,reverse:true}}}});
+  new Chart(cd,{type:"line",data:{labels:runs.map(r=>r.d.slice(5)),datasets:[{data:runs.map(r=>r.c),borderColor:"#16a34a",backgroundColor:"rgba(22,163,74,.12)",fill:true,tension:.3,pointRadius:2}]},options:{...co,scales:{x:gx,y:gx}}});
+  new Chart(ld,{type:"bar",data:{labels:weeks.map(wkLbl),datasets:[{data:weeks.map(k=>wk[k].e),backgroundColor:"#f59e0b",borderRadius:6}]},options:{...co,scales:{x:gx,y:{...gx,beginAtZero:true}}}});
+}
+
+async function boot(){
+  try{
+    const res=await fetch("/api/strava/activities",{credentials:"same-origin"});
+    if(res.ok){
+      const data=await res.json();
+      if(data.runs && data.runs.length){ render(data.runs, true); return; }
+    }
+  }catch(e){/* offline or not deployed yet */}
+  render(DEMO, false); // fallback: demo data + Connect button
+}
+boot();
+if("serviceWorker" in navigator){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
