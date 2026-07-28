@@ -143,6 +143,12 @@ function buildStats(){
   };
 }
 
+function mdLite(t){ if(!t) return "";
+  t=(""+t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  t=t.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
+  t=t.replace(/(^|[^*])\*([^*\n]+)\*/g,"$1<em>$2</em>");
+  return t.replace(/\n/g,"<br>");
+}
 /* ---------------- coach (rules fallback) ---------------- */
 function coachNote(){
   const runs=runsSorted(); if(!runs.length) return "";
@@ -324,13 +330,13 @@ function renderDetail(){
 async function loadCoach(){
   const el=document.getElementById("coachText"); if(!el) return;
   const key="coach:"+md0(anchor());
-  try{ const c=localStorage.getItem(key); if(c){ el.textContent=c; return; } }catch(e){}
+  try{ const c=localStorage.getItem(key); if(c){ el.innerHTML=mdLite(c); return; } }catch(e){}
   try{
     const r=await fetch("/api/coach",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stats:buildStats()})});
     const j=await r.json();
-    if(j&&j.ok&&j.text){ el.textContent=j.text; try{localStorage.setItem(key,j.text);}catch(e){} return; }
+    if(j&&j.ok&&j.text){ el.innerHTML=mdLite(j.text); try{localStorage.setItem(key,j.text);}catch(e){} return; }
   }catch(e){}
-  el.textContent=coachNote();
+  el.innerHTML=mdLite(coachNote());
 }
 async function askCoach(){
   const inp=document.getElementById("coachQ"), ans=document.getElementById("coachAns");
@@ -339,7 +345,7 @@ async function askCoach(){
   try{
     const r=await fetch("/api/coach",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({stats:buildStats(),question:q})});
     const j=await r.json();
-    ans.textContent=(j&&j.ok&&j.text)?j.text:"The AI coach isn't switched on yet (needs the API key). The read above still works.";
+    ans.innerHTML=(j&&j.ok&&j.text)?mdLite(j.text):"The AI coach isn't switched on yet (needs the API key). The read above still works.";
   }catch(e){ ans.textContent="Couldn't reach the coach right now."; }
 }
 
