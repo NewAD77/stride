@@ -60,6 +60,12 @@ th { color:#7a828c; font-weight:600; font-size:10px; text-transform:uppercase; }
 .chip.on { background:var(--indigo); border-color:var(--indigo); color:#fff; }
 .section-title { font-size:13px; font-weight:700; color:#4a4f57; margin:2px 2px 8px; }
 .loading { text-align:center; color:#8a9099; padding:40px 0; }
+input[type=range]{accent-color:#0ea5e9;height:26px}
+.confetti-wrap{position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden}
+.confetti-piece{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;opacity:.9;animation:conffall linear forwards}
+@keyframes conffall{to{transform:translateY(108vh) rotate(720deg)}}
+.goal-toast{position:fixed;left:50%;top:34%;transform:translateX(-50%);background:#111827;color:#fff;padding:13px 20px;border-radius:14px;font-weight:700;font-size:15px;box-shadow:0 10px 34px rgba(0,0,0,.28);animation:toastpop .3s ease;z-index:10000}
+@keyframes toastpop{from{transform:translateX(-50%) scale(.8);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
 </style>
 </head>
 <body>
@@ -83,6 +89,7 @@ const DEMO_WK = [
 ];
 const state = { runs:[], workouts:[], oura:null, withings:null, live:false, view:"home", range:"12W", rf:"all" };
 let charts = [];
+let hydroCustomOpen = false;
 function clearCharts(){ charts.forEach(c=>{ try{c.destroy();}catch(e){} }); charts=[]; }
 
 /* ---------------- nutrition (on-device) ---------------- */
@@ -125,9 +132,27 @@ function hydroLogArr(){ return nutLoad("hydrolog"); }
 function hydroToday(){ const t=todayStr(); return hydroLogArr().filter(x=>x.d===t).reduce((s,x)=>s+(x.ml||0),0); }
 function hydroGoal(){ return +(localStorage.getItem("hydrogoal")||2500); }
 function hydroAfter(){ if(state.view==="hydration") renderDetail(); else renderHome(); }
-function hydroAdd(ml){ const l=hydroLogArr(); l.push({ts:Date.now(),d:todayStr(),ml:ml}); nutSaveK("hydrolog",l); hydroAfter(); }
+function hydroAdd(ml){ ml=Math.round(+ml||0); if(!ml) return; const prev=hydroToday(); const g=hydroGoal(); const l=hydroLogArr(); l.push({ts:Date.now(),d:todayStr(),ml:ml}); nutSaveK("hydrolog",l); if(prev<g && prev+ml>=g) confetti(); hydroAfter(); }
 function hydroUndo(){ const l=hydroLogArr(), t=todayStr(); for(let i=l.length-1;i>=0;i--){ if(l[i].d===t){ l.splice(i,1); break; } } nutSaveK("hydrolog",l); hydroAfter(); }
 function hydroSetGoal(v){ localStorage.setItem("hydrogoal",String(Math.max(250,Math.round(+v||2500)))); renderDetail(); }
+function hydroControls(){
+  let s=`<div class="ask" style="flex-wrap:wrap"><button class="btn" data-hydro="250" style="background:#0ea5e9;flex:1;min-width:100px">+ 250ml</button><button class="btn" data-hydro="500" style="background:#0284c7;flex:1;min-width:100px">+ 500ml</button><button class="btn" data-hydro="toggle" style="background:${hydroCustomOpen?'#334155':'#64748b'};flex:1;min-width:90px">Custom</button></div>`;
+  if(hydroCustomOpen){ s+=`<div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+    <input type="range" id="hydroSlider" min="10" max="1500" step="10" value="300" style="flex:1">
+    <span id="hydroSliderVal" style="font-weight:700;min-width:66px;text-align:right">300 ml</span>
+    <button class="btn" data-hydro="custom" style="background:#0ea5e9">Add</button></div>
+    <div class="muted">Slide in 10&nbsp;ml steps (10–1500&nbsp;ml).</div>`; }
+  return s;
+}
+function confetti(){
+  const wrap=document.createElement("div"); wrap.className="confetti-wrap";
+  const colors=["#4f46e5","#0ea5e9","#f59e0b","#16a34a","#e11d48","#7c3aed"];
+  for(let i=0;i<90;i++){ const p=document.createElement("i"); p.className="confetti-piece";
+    p.style.left=(Math.random()*100)+"vw"; p.style.background=colors[i%colors.length];
+    p.style.animationDelay=(Math.random()*0.35)+"s"; p.style.animationDuration=(1.8+Math.random()*1.3)+"s"; wrap.appendChild(p); }
+  const toast=document.createElement("div"); toast.className="goal-toast"; toast.textContent="🎉 Daily water goal achieved!"; wrap.appendChild(toast);
+  document.body.appendChild(wrap); setTimeout(()=>wrap.remove(), 3300);
+}
 
 /* ---------------- helpers ---------------- */
 const fmtPace=m=>{if(!m)return"–";const s=1000/m,x=Math.floor(s/60),y=Math.round(s-x*60);return x+":"+String(y).padStart(2,"0");};
@@ -234,7 +259,7 @@ function renderHome(){
   const hw=hydroToday(), hg=hydroGoal();
   h+=`<div class="panel"><h2><span data-open="hydration" style="cursor:pointer">Hydration · today</span><span data-open="hydration" style="cursor:pointer">${(hw/1000).toFixed(2)} / ${(hg/1000).toFixed(1)} L <span class="chev">›</span></span></h2>
     <div style="height:9px;background:#eef0f3;border-radius:6px;margin:8px 0;overflow:hidden"><div style="height:100%;width:${Math.min(100,hg?hw/hg*100:0)}%;background:#0ea5e9"></div></div>
-    <div class="ask"><button class="btn" data-hydro="250" style="background:#0ea5e9;flex:1">+ Glass 250ml</button><button class="btn" data-hydro="500" style="background:#0284c7;flex:1">+ Bottle 500ml</button></div></div>`;
+    ${hydroControls()}</div>`;
 
   if(state.oura&&state.oura.connected&&state.oura.days&&state.oura.days.length){
     const l=state.oura.days[state.oura.days.length-1];
@@ -374,7 +399,8 @@ function renderDetail(){
     h+=`<div class="panel"><h2>Today</h2>
       <div style="font-size:30px;font-weight:700;margin-top:4px">${(w/1000).toFixed(2)} <span style="font-size:14px;color:#7a828c;font-weight:500">/ ${(g/1000).toFixed(1)} L</span></div>
       <div style="height:10px;background:#eef0f3;border-radius:6px;margin:10px 0;overflow:hidden"><div style="height:100%;width:${Math.min(100,g?w/g*100:0)}%;background:#0ea5e9"></div></div>
-      <div class="ask" style="flex-wrap:wrap"><button class="btn" data-hydro="250" style="background:#0ea5e9">+250ml</button><button class="btn" data-hydro="500" style="background:#0284c7">+500ml</button><button class="btn" data-hydro="1000" style="background:#0369a1">+1L</button><button class="btn" data-hydro="undo" style="background:#94a3b8">Undo</button></div>
+      ${hydroControls()}
+      <div class="ask" style="margin-top:8px"><button class="btn" data-hydro="1000" style="background:#0369a1;flex:1">+ 1L</button><button class="btn" data-hydro="undo" style="background:#94a3b8;flex:1">Undo last</button></div>
       <div style="margin-top:12px;display:flex;gap:8px;align-items:center"><span class="hint">Daily goal (ml)</span><input id="hgoal" type="number" value="${g}" style="width:110px;border:1px solid #d9dbe6;border-radius:10px;padding:7px 9px"><button class="btn" data-hydro="goal" style="background:var(--indigo)">Set</button></div></div>`;
     const days={}; hydroLogArr().forEach(x=>{ days[x.d]=(days[x.d]||0)+x.ml; });
     const keys=Object.keys(days).sort().reverse().slice(0,10);
@@ -447,7 +473,11 @@ async function askCoach(){
 document.addEventListener("click",(e)=>{
   const ask=e.target.closest("[data-ask]"); if(ask){ askCoach(); return; }
   const wq=e.target.closest("[data-hydro]"); if(wq){ const v=wq.getAttribute("data-hydro");
-    if(v==="undo") hydroUndo(); else if(v==="goal"){ const el=document.getElementById("hgoal"); hydroSetGoal(el?el.value:2500); } else hydroAdd(+v);
+    if(v==="undo") hydroUndo();
+    else if(v==="toggle"){ hydroCustomOpen=!hydroCustomOpen; hydroAfter(); }
+    else if(v==="custom"){ const el=document.getElementById("hydroSlider"); hydroCustomOpen=false; hydroAdd(el?+el.value:300); }
+    else if(v==="goal"){ const el=document.getElementById("hgoal"); hydroSetGoal(el?el.value:2500); }
+    else hydroAdd(+v);
     return; }
   const n=e.target.closest("[data-nut]"); if(n){ const a=n.getAttribute("data-nut");
     if(a==="analyze") analyzeNutrition();
@@ -465,6 +495,7 @@ document.addEventListener("click",(e)=>{
 });
 document.addEventListener("keydown",(e)=>{ if(e.key==="Enter" && e.target && e.target.id==="coachQ"){ askCoach(); } });
 document.addEventListener("change",(e)=>{ if(e.target && e.target.id==="nutPhoto"){ nutFile=(e.target.files&&e.target.files[0])||null; const nm=document.getElementById("nutPhotoName"); if(nm) nm.textContent=nutFile?"📎 photo attached":""; } });
+document.addEventListener("input",(e)=>{ if(e.target && e.target.id==="hydroSlider"){ const l=document.getElementById("hydroSliderVal"); if(l) l.textContent=e.target.value+" ml"; } });
 
 async function boot(){
   try{ const o=await fetch("/api/oura",{credentials:"same-origin"}); if(o.ok) state.oura=await o.json(); }catch(e){}
