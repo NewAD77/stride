@@ -293,7 +293,7 @@ function rangeChips(){ return `<div class="chips">${["4W","12W","All"].map(r=>`<
 function renderDetail(){
   clearCharts(); const kind=state.view;
   document.getElementById("topbar").innerHTML=`<button class="back" data-back>‹ Back</button><h1 style="font-size:19px">${TITLES[kind]||""}</h1>`;
-  let h=""; if(kind!=="runs"&&kind!=="f45") h+=rangeChips();
+  let h=""; if(kind!=="runs"&&kind!=="f45"&&kind!=="nutrition") h+=rangeChips();
 
   if(kind==="volume"||kind==="pace"||kind==="cadence"){
     const runs=runsInRange();
