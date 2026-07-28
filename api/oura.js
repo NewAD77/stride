@@ -1,7 +1,28 @@
-// GET /api/oura  ->  returns recent daily readiness, sleep, HRV and resting HR from Oura.
-// Uses a personal access token stored in the OURA_TOKEN env var. If no token is set,
-// responds { connected: false } so the app simply hides the recovery card.
+// GET /api/oura  ->  recent Oura readiness/sleep/HRV/resting-HR.
+// Gated behind the same signed login cookie as the Strava endpoints, so only a
+// connected device (holding a valid stride_strava cookie) can read this data.
+import crypto from "crypto";
+
+function parseCookies(header) {
+  const out = {};
+  (header || "").split(";").forEach((p) => {
+    const i = p.indexOf("=");
+    if (i > 0) out[p.slice(0, i).trim()] = p.slice(i + 1).trim();
+  });
+  return out;
+}
+function authed(req) {
+  const raw = parseCookies(req.headers.cookie).stride_strava;
+  if (!raw) return false;
+  const dot = raw.lastIndexOf(".");
+  if (dot < 1) return false;
+  const val = raw.slice(0, dot), sig = raw.slice(dot + 1);
+  const expect = crypto.createHmac("sha256", process.env.COOKIE_SECRET).update(val).digest("hex");
+  return !!sig && sig === expect;
+}
+
 export default async function handler(req, res) {
+  if (!authed(req)) { res.status(401).json({ connected: false, error: "unauthorized" }); return; }
   const token = process.env.OURA_TOKEN;
   if (!token) { res.status(200).json({ connected: false }); return; }
 
