@@ -120,6 +120,15 @@ function nutDelFav(i){ const fav=nutLoad("nutfav"); fav.splice(i,1); nutSaveK("n
 function nutRow(label,id,val){ return `<div style="margin-top:8px"><div style="font-size:11px;color:#7a828c;text-transform:uppercase;letter-spacing:.05em">${label}</div><input id="${id}" type="text" value="${(""+(val==null?"":val)).replace(/"/g,'&quot;')}" style="width:100%;border:1px solid #d9dbe6;border-radius:10px;padding:8px 10px;font-size:14px;margin-top:3px"></div>`; }
 function nutNum(label,id,val){ return `<div class="card"><div class="k">${label}</div><input id="${id}" type="number" value="${val!=null?val:0}" style="width:100%;border:none;font-size:22px;font-weight:680;background:transparent;margin-top:2px;padding:0"></div>`; }
 
+/* ---------------- hydration (on-device) ---------------- */
+function hydroLogArr(){ return nutLoad("hydrolog"); }
+function hydroToday(){ const t=todayStr(); return hydroLogArr().filter(x=>x.d===t).reduce((s,x)=>s+(x.ml||0),0); }
+function hydroGoal(){ return +(localStorage.getItem("hydrogoal")||2500); }
+function hydroAfter(){ if(state.view==="hydration") renderDetail(); else renderHome(); }
+function hydroAdd(ml){ const l=hydroLogArr(); l.push({ts:Date.now(),d:todayStr(),ml:ml}); nutSaveK("hydrolog",l); hydroAfter(); }
+function hydroUndo(){ const l=hydroLogArr(), t=todayStr(); for(let i=l.length-1;i>=0;i--){ if(l[i].d===t){ l.splice(i,1); break; } } nutSaveK("hydrolog",l); hydroAfter(); }
+function hydroSetGoal(v){ localStorage.setItem("hydrogoal",String(Math.max(250,Math.round(+v||2500)))); renderDetail(); }
+
 /* ---------------- helpers ---------------- */
 const fmtPace=m=>{if(!m)return"–";const s=1000/m,x=Math.floor(s/60),y=Math.round(s-x*60);return x+":"+String(y).padStart(2,"0");};
 const fmtDur=s=>{const h=Math.floor(s/3600),m=Math.round((s-h*3600)/60);return h>0?h+"h "+m+"m":m+"m";};
@@ -175,7 +184,8 @@ function buildStats(){
     f45: { totalSessions:(state.workouts||[]).length, last28days:f45recent.length, avgHr:f45hr.length?Math.round(f45hr.reduce((s,w)=>s+w.hr,0)/f45hr.length):null },
     aerobicEfficiency: effTrend(),
     recovery: rec, body: body,
-    nutritionToday: nutToday()
+    nutritionToday: nutToday(),
+    hydrationTodayMl: hydroToday(), hydrationGoalMl: hydroGoal()
   };
 }
 
@@ -220,6 +230,11 @@ function renderHome(){
   const nt=nutToday();
   h+=`<div class="panel tap" data-open="nutrition"><h2>Nutrition · today <span class="chev">›</span></h2><div class="hint">log a meal by photo or description</div>
     <div class="cards" style="margin-top:8px">${card("Calories",nt.cal)}${card("Protein",nt.p+' <small>g</small>')}${card("Carbs",nt.c+' <small>g</small>')}${card("Fat",nt.f+' <small>g</small>')}</div></div>`;
+
+  const hw=hydroToday(), hg=hydroGoal();
+  h+=`<div class="panel"><h2><span data-open="hydration" style="cursor:pointer">Hydration · today</span><span data-open="hydration" style="cursor:pointer">${(hw/1000).toFixed(2)} / ${(hg/1000).toFixed(1)} L <span class="chev">›</span></span></h2>
+    <div style="height:9px;background:#eef0f3;border-radius:6px;margin:8px 0;overflow:hidden"><div style="height:100%;width:${Math.min(100,hg?hw/hg*100:0)}%;background:#0ea5e9"></div></div>
+    <div class="ask"><button class="btn" data-hydro="250" style="background:#0ea5e9;flex:1">+ Glass 250ml</button><button class="btn" data-hydro="500" style="background:#0284c7;flex:1">+ Bottle 500ml</button></div></div>`;
 
   if(state.oura&&state.oura.connected&&state.oura.days&&state.oura.days.length){
     const l=state.oura.days[state.oura.days.length-1];
@@ -287,7 +302,7 @@ function drawEff(id, runs){ const r=runs.filter(x=>effOf(x)!=null);
   charts.push(new Chart(document.getElementById(id),{type:"line",data:{labels:r.map(x=>md(x.d)),datasets:[{data:r.map(x=>effOf(x)),borderColor:"#7c3aed",backgroundColor:"rgba(124,58,237,.12)",fill:true,tension:.3,pointRadius:3}]},options:{...co,scales:{x:gx,y:gx}}})); }
 
 /* ---------------- DETAIL ---------------- */
-const TITLES={volume:"Weekly volume",pace:"Pace trend",cadence:"Cadence trend",load:"Training load",recovery:"Recovery",body:"Body composition",runs:"All runs",efficiency:"Aerobic efficiency",f45:"Cross-training · F45",nutrition:"Nutrition"};
+const TITLES={volume:"Weekly volume",pace:"Pace trend",cadence:"Cadence trend",load:"Training load",recovery:"Recovery",body:"Body composition",runs:"All runs",efficiency:"Aerobic efficiency",f45:"Cross-training · F45",nutrition:"Nutrition",hydration:"Hydration"};
 function openDetail(kind){ state.view=kind; renderDetail(); window.scrollTo(0,0); }
 function rangeChips(){ return `<div class="chips">${["4W","12W","All"].map(r=>`<div class="chip ${state.range===r?'on':''}" data-range="${r}">${r==="4W"?"4 weeks":r==="12W"?"12 weeks":"All"}</div>`).join("")}</div>`; }
 function renderDetail(){
@@ -354,6 +369,19 @@ function renderDetail(){
     document.getElementById("content").innerHTML=h;
     charts.push(new Chart(document.getElementById("dc"),{type:"bar",data:{labels:weeks.map(wkLbl),datasets:[{data:weeks.map(k=>wk[k]),backgroundColor:"#f59e0b",borderRadius:6}]},options:{...co,scales:{x:gx,y:{...gx,beginAtZero:true}}}})); return;
   }
+  if(kind==="hydration"){
+    const w=hydroToday(), g=hydroGoal();
+    h+=`<div class="panel"><h2>Today</h2>
+      <div style="font-size:30px;font-weight:700;margin-top:4px">${(w/1000).toFixed(2)} <span style="font-size:14px;color:#7a828c;font-weight:500">/ ${(g/1000).toFixed(1)} L</span></div>
+      <div style="height:10px;background:#eef0f3;border-radius:6px;margin:10px 0;overflow:hidden"><div style="height:100%;width:${Math.min(100,g?w/g*100:0)}%;background:#0ea5e9"></div></div>
+      <div class="ask" style="flex-wrap:wrap"><button class="btn" data-hydro="250" style="background:#0ea5e9">+250ml</button><button class="btn" data-hydro="500" style="background:#0284c7">+500ml</button><button class="btn" data-hydro="1000" style="background:#0369a1">+1L</button><button class="btn" data-hydro="undo" style="background:#94a3b8">Undo</button></div>
+      <div style="margin-top:12px;display:flex;gap:8px;align-items:center"><span class="hint">Daily goal (ml)</span><input id="hgoal" type="number" value="${g}" style="width:110px;border:1px solid #d9dbe6;border-radius:10px;padding:7px 9px"><button class="btn" data-hydro="goal" style="background:var(--indigo)">Set</button></div></div>`;
+    const days={}; hydroLogArr().forEach(x=>{ days[x.d]=(days[x.d]||0)+x.ml; });
+    const keys=Object.keys(days).sort().reverse().slice(0,10);
+    if(keys.length){ h+=`<div class="panel"><h2>Recent days</h2><table style="margin-top:8px"><thead><tr><th>Date</th><th>Litres</th><th>vs goal</th></tr></thead><tbody>`+
+      keys.map(k=>`<tr><td>${md(k)}</td><td>${(days[k]/1000).toFixed(2)}</td><td>${g?Math.round(days[k]/g*100)+"%":"–"}</td></tr>`).join("")+`</tbody></table></div>`; }
+    document.getElementById("content").innerHTML=h; return;
+  }
   if(kind==="nutrition"){
     const nt=nutToday(), log=nutLoad("nutlog").filter(x=>x.d===todayStr()).slice().reverse(), fav=nutLoad("nutfav");
     h+=`<div class="panel"><div class="hint">Describe a meal or recipe, or add a photo — Stride estimates the macros.</div>
@@ -418,6 +446,9 @@ async function askCoach(){
 /* ---------------- events + boot ---------------- */
 document.addEventListener("click",(e)=>{
   const ask=e.target.closest("[data-ask]"); if(ask){ askCoach(); return; }
+  const wq=e.target.closest("[data-hydro]"); if(wq){ const v=wq.getAttribute("data-hydro");
+    if(v==="undo") hydroUndo(); else if(v==="goal"){ const el=document.getElementById("hgoal"); hydroSetGoal(el?el.value:2500); } else hydroAdd(+v);
+    return; }
   const n=e.target.closest("[data-nut]"); if(n){ const a=n.getAttribute("data-nut");
     if(a==="analyze") analyzeNutrition();
     else if(a==="log") nutLog(readNP(),false);
