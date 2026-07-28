@@ -85,6 +85,41 @@ const state = { runs:[], workouts:[], oura:null, withings:null, live:false, view
 let charts = [];
 function clearCharts(){ charts.forEach(c=>{ try{c.destroy();}catch(e){} }); charts=[]; }
 
+/* ---------------- nutrition (on-device) ---------------- */
+let nutFile=null, nutPending=null;
+function nutLoad(k){ try{ return JSON.parse(localStorage.getItem(k)||"[]"); }catch(e){ return []; } }
+function nutSaveK(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function nutToday(){ const t=todayStr(); return nutLoad("nutlog").filter(x=>x.d===t).reduce((s,x)=>({cal:s.cal+(x.cal||0),p:s.p+(x.p||0),c:s.c+(x.c||0),f:s.f+(x.f||0)}),{cal:0,p:0,c:0,f:0}); }
+function fileToScaledB64(file){ return new Promise((resolve,reject)=>{ const img=new Image(); const url=URL.createObjectURL(file);
+  img.onload=()=>{ const max=1024; let w=img.width,h=img.height; const s=Math.min(1,max/Math.max(w,h)); w=Math.round(w*s); h=Math.round(h*s);
+    const c=document.createElement("canvas"); c.width=w; c.height=h; c.getContext("2d").drawImage(img,0,0,w,h);
+    const d=c.toDataURL("image/jpeg",0.7); URL.revokeObjectURL(url); resolve(d.split(",")[1]); };
+  img.onerror=reject; img.src=url; }); }
+async function analyzeNutrition(){
+  const ta=document.getElementById("nutText"); const text=ta?ta.value.trim():"";
+  if(!text && !nutFile) return;
+  nutPending={loading:true}; renderDetail();
+  const payload={text};
+  try{ if(nutFile){ payload.imageB64=await fileToScaledB64(nutFile); payload.mime="image/jpeg"; } }catch(e){}
+  try{
+    const r=await fetch("/api/nutrition",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const j=await r.json();
+    nutPending=(j&&j.ok&&j.item)?j.item:{error:(j&&j.reason==="no_key")?"AI coach isn't switched on (API key).":"Couldn't read that — try describing it in more detail."};
+  }catch(e){ nutPending={error:"Network error — try again."}; }
+  nutFile=null; renderDetail();
+}
+function readNP(){ const g=id=>{const el=document.getElementById(id);return el?el.value:"";};
+  return { name:g("np_name")||"Meal", portion:g("np_portion"), cal:Math.round(+g("np_cal")||0), p:Math.round(+g("np_p")||0), c:Math.round(+g("np_c")||0), f:Math.round(+g("np_f")||0) }; }
+function nutLog(item, alsoFav){ const log=nutLoad("nutlog"); log.push(Object.assign({ts:Date.now(),d:todayStr()},item)); nutSaveK("nutlog",log);
+  if(alsoFav){ const fav=nutLoad("nutfav"); if(!fav.some(f=>(f.name||"").toLowerCase()===(item.name||"").toLowerCase())){ fav.push(item); nutSaveK("nutfav",fav); } }
+  nutPending=null; renderDetail(); }
+function nutDel(ts){ nutSaveK("nutlog", nutLoad("nutlog").filter(x=>String(x.ts)!==String(ts))); renderDetail(); }
+function nutAddFav(i){ const fav=nutLoad("nutfav"); if(fav[i]) nutLog(Object.assign({},fav[i]),false); }
+function nutDelFav(i){ const fav=nutLoad("nutfav"); fav.splice(i,1); nutSaveK("nutfav",fav); renderDetail(); }
+function nutRow(label,id,val){ return `<div style="margin-top:8px"><div style="font-size:11px;color:#7a828c;text-transform:uppercase;letter-spacing:.05em">${label}</div><input id="${id}" type="text" value="${(""+(val==null?"":val)).replace(/"/g,'&quot;')}" style="width:100%;border:1px solid #d9dbe6;border-radius:10px;padding:8px 10px;font-size:14px;margin-top:3px"></div>`; }
+function nutNum(label,id,val){ return `<div class="card"><div class="k">${label}</div><input id="${id}" type="number" value="${val!=null?val:0}" style="width:100%;border:none;font-size:22px;font-weight:680;background:transparent;margin-top:2px;padding:0"></div>`; }
+
 /* ---------------- helpers ---------------- */
 const fmtPace=m=>{if(!m)return"–";const s=1000/m,x=Math.floor(s/60),y=Math.round(s-x*60);return x+":"+String(y).padStart(2,"0");};
 const fmtDur=s=>{const h=Math.floor(s/3600),m=Math.round((s-h*3600)/60);return h>0?h+"h "+m+"m":m+"m";};
@@ -139,7 +174,8 @@ function buildStats(){
     recentRuns: runs.slice(-6).map(r=>({date:r.d, km:+(r.m/1000).toFixed(1), pace:fmtPace(r.mps), avgHr:r.hr, cadence:r.c, tempC:r.wx&&r.wx.t!=null?Math.round(r.wx.t):null, gps:r.g})),
     f45: { totalSessions:(state.workouts||[]).length, last28days:f45recent.length, avgHr:f45hr.length?Math.round(f45hr.reduce((s,w)=>s+w.hr,0)/f45hr.length):null },
     aerobicEfficiency: effTrend(),
-    recovery: rec, body: body
+    recovery: rec, body: body,
+    nutritionToday: nutToday()
   };
 }
 
@@ -180,6 +216,10 @@ function renderHome(){
   h+=`<div class="panel ai"><h2>🧠 Coach's read <span class="badge">v2</span></h2><p id="coachText">Analysing your training…</p>
     <div class="ask"><input id="coachQ" placeholder="Ask your coach anything…"><button class="btn" data-ask style="background:var(--indigo)">Ask</button></div>
     <div id="coachAns"></div></div>`;
+
+  const nt=nutToday();
+  h+=`<div class="panel tap" data-open="nutrition"><h2>Nutrition · today <span class="chev">›</span></h2><div class="hint">log a meal by photo or description</div>
+    <div class="cards" style="margin-top:8px">${card("Calories",nt.cal)}${card("Protein",nt.p+' <small>g</small>')}${card("Carbs",nt.c+' <small>g</small>')}${card("Fat",nt.f+' <small>g</small>')}</div></div>`;
 
   if(state.oura&&state.oura.connected&&state.oura.days&&state.oura.days.length){
     const l=state.oura.days[state.oura.days.length-1];
@@ -247,7 +287,7 @@ function drawEff(id, runs){ const r=runs.filter(x=>effOf(x)!=null);
   charts.push(new Chart(document.getElementById(id),{type:"line",data:{labels:r.map(x=>md(x.d)),datasets:[{data:r.map(x=>effOf(x)),borderColor:"#7c3aed",backgroundColor:"rgba(124,58,237,.12)",fill:true,tension:.3,pointRadius:3}]},options:{...co,scales:{x:gx,y:gx}}})); }
 
 /* ---------------- DETAIL ---------------- */
-const TITLES={volume:"Weekly volume",pace:"Pace trend",cadence:"Cadence trend",load:"Training load",recovery:"Recovery",body:"Body composition",runs:"All runs",efficiency:"Aerobic efficiency",f45:"Cross-training · F45"};
+const TITLES={volume:"Weekly volume",pace:"Pace trend",cadence:"Cadence trend",load:"Training load",recovery:"Recovery",body:"Body composition",runs:"All runs",efficiency:"Aerobic efficiency",f45:"Cross-training · F45",nutrition:"Nutrition"};
 function openDetail(kind){ state.view=kind; renderDetail(); window.scrollTo(0,0); }
 function rangeChips(){ return `<div class="chips">${["4W","12W","All"].map(r=>`<div class="chip ${state.range===r?'on':''}" data-range="${r}">${r==="4W"?"4 weeks":r==="12W"?"12 weeks":"All"}</div>`).join("")}</div>`; }
 function renderDetail(){
@@ -314,6 +354,32 @@ function renderDetail(){
     document.getElementById("content").innerHTML=h;
     charts.push(new Chart(document.getElementById("dc"),{type:"bar",data:{labels:weeks.map(wkLbl),datasets:[{data:weeks.map(k=>wk[k]),backgroundColor:"#f59e0b",borderRadius:6}]},options:{...co,scales:{x:gx,y:{...gx,beginAtZero:true}}}})); return;
   }
+  if(kind==="nutrition"){
+    const nt=nutToday(), log=nutLoad("nutlog").filter(x=>x.d===todayStr()).slice().reverse(), fav=nutLoad("nutfav");
+    h+=`<div class="panel"><div class="hint">Describe a meal or recipe, or add a photo — Stride estimates the macros.</div>
+      <textarea id="nutText" rows="3" placeholder="e.g. green shake: 2 handfuls spinach, 1 tbsp raw tahini, juice of 1 lemon, 4 celery sticks, 2 cups water, ice" style="width:100%;margin-top:8px;border:1px solid #d9dbe6;border-radius:11px;padding:10px 12px;font-size:14px;font-family:inherit"></textarea>
+      <div class="ask"><label class="btn" style="background:#0ea5e9;text-align:center">📷 Photo<input id="nutPhoto" type="file" accept="image/*" capture="environment" style="display:none"></label>
+      <button class="btn" data-nut="analyze" style="background:var(--indigo);flex:1">Analyze</button></div>
+      <div class="muted" id="nutPhotoName">${nutFile?"📎 photo attached":""}</div></div>`;
+    if(nutPending&&nutPending.loading){ h+=`<div class="panel"><div class="loading">Analysing…</div></div>`; }
+    else if(nutPending&&nutPending.error){ h+=`<div class="banner warn">${nutPending.error}</div>`; }
+    else if(nutPending){ const it=nutPending;
+      h+=`<div class="panel"><h2>Confirm</h2><div class="hint">Edit anything, then log it${it.confidence?" · confidence: "+it.confidence:""}.</div>
+        ${nutRow("Name","np_name",it.name)}${nutRow("Portion","np_portion",it.portion)}
+        <div class="cards" style="margin-top:8px">${nutNum("Calories","np_cal",it.calories)}${nutNum("Protein g","np_p",it.protein)}${nutNum("Carbs g","np_c",it.carbs)}${nutNum("Fat g","np_f",it.fat)}</div>
+        ${it.note?`<div class="muted">${it.note}</div>`:""}
+        <div class="ask"><button class="btn" data-nut="log" style="background:#177245;flex:1">Log it</button><button class="btn" data-nut="logfav" style="background:var(--indigo)">Log + save regular</button></div>
+        <div style="text-align:center;margin-top:8px"><a data-nut="cancel" style="color:#9aa0a8;font-size:13px;cursor:pointer">Discard</a></div></div>`;
+    }
+    h+=`<div class="panel"><h2>Today</h2><div class="cards" style="margin-top:8px">${card("Calories",nt.cal)}${card("Protein",nt.p+' <small>g</small>')}${card("Carbs",nt.c+' <small>g</small>')}${card("Fat",nt.f+' <small>g</small>')}</div>`;
+    if(log.length){ h+=`<table style="margin-top:10px"><thead><tr><th>Item</th><th>kcal</th><th>P</th><th></th></tr></thead><tbody>`+
+      log.map(x=>`<tr><td>${x.name||"—"}${x.portion?` <span style="color:#9aa0a8">· ${x.portion}</span>`:""}</td><td>${x.cal||0}</td><td>${x.p||0}</td><td><a data-nut="del" data-ts="${x.ts}" style="color:#c0392b;cursor:pointer">✕</a></td></tr>`).join("")+`</tbody></table>`;
+    } else { h+=`<div class="muted">No meals logged today yet.</div>`; }
+    h+=`</div>`;
+    if(fav.length){ h+=`<div class="panel"><h2>Regulars</h2><div class="hint">tap to add to today</div><div class="chips" style="margin-top:8px">`+
+      fav.map((f,i)=>`<span class="chip" data-nut="fav" data-i="${i}">${f.name} · ${f.cal}kcal <span data-nut="delfav" data-i="${i}" style="color:#c0392b;margin-left:5px">✕</span></span>`).join("")+`</div></div>`; }
+    document.getElementById("content").innerHTML=h; return;
+  }
   if(kind==="runs"){
     const buckets={all:()=>true,"5k":r=>r.m>=4500&&r.m<=5500,"10k":r=>r.m>=9000&&r.m<=11000,long:r=>r.m>12000};
     h+=`<div class="chips">${[["all","All"],["5k","~5k"],["10k","~10k"],["long","Long (12k+)"]].map(([k,lab])=>`<div class="chip ${state.rf===k?'on':''}" data-filter="${k}">${lab}</div>`).join("")}</div>`;
@@ -352,12 +418,22 @@ async function askCoach(){
 /* ---------------- events + boot ---------------- */
 document.addEventListener("click",(e)=>{
   const ask=e.target.closest("[data-ask]"); if(ask){ askCoach(); return; }
+  const n=e.target.closest("[data-nut]"); if(n){ const a=n.getAttribute("data-nut");
+    if(a==="analyze") analyzeNutrition();
+    else if(a==="log") nutLog(readNP(),false);
+    else if(a==="logfav") nutLog(readNP(),true);
+    else if(a==="cancel"){ nutPending=null; renderDetail(); }
+    else if(a==="del") nutDel(n.getAttribute("data-ts"));
+    else if(a==="delfav") nutDelFav(+n.getAttribute("data-i"));
+    else if(a==="fav") nutAddFav(+n.getAttribute("data-i"));
+    return; }
   const o=e.target.closest("[data-open]"); if(o){ openDetail(o.getAttribute("data-open")); return; }
   const r=e.target.closest("[data-range]"); if(r){ state.range=r.getAttribute("data-range"); renderDetail(); return; }
   const f=e.target.closest("[data-filter]"); if(f){ state.rf=f.getAttribute("data-filter"); renderDetail(); return; }
   const b=e.target.closest("[data-back]"); if(b){ state.view="home"; state.range="12W"; renderHome(); return; }
 });
 document.addEventListener("keydown",(e)=>{ if(e.key==="Enter" && e.target && e.target.id==="coachQ"){ askCoach(); } });
+document.addEventListener("change",(e)=>{ if(e.target && e.target.id==="nutPhoto"){ nutFile=(e.target.files&&e.target.files[0])||null; const nm=document.getElementById("nutPhotoName"); if(nm) nm.textContent=nutFile?"📎 photo attached":""; } });
 
 async function boot(){
   try{ const o=await fetch("/api/oura",{credentials:"same-origin"}); if(o.ok) state.oura=await o.json(); }catch(e){}
